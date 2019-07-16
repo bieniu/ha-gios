@@ -26,7 +26,6 @@ sensor:
 ```
 
 ## Arguments
-
 key | optional | type | default | description
 -- | -- | -- | -- | --
 `station_id` | False | integer | | ID of the measuring station

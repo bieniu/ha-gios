@@ -1,3 +1,4 @@
+# GIOŚ (Główny Inspektorat Ochrony Środowiska)
 The component collects data about air quality in Poland from GIOŚ and present as sensors in Home Assitant.
 
 ## Minimal configuration

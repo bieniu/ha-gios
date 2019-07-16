@@ -1,6 +1,8 @@
 # GIOŚ (Główny Inspektorat Ochrony Środowiska)
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs)
 
+![Screenshot](https://github.com/bieniu/ha-gios/blob/master/images/gios-ha.png?raw=true)
+
 The component collects data about air quality in Poland from [GIOŚ](http://powietrze.gios.gov.pl/pjp/current) and present as sensors in Home Assitant.
 
 ## How to find station_id

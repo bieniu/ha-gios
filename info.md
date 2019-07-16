@@ -1,6 +1,12 @@
 # GIOŚ (Główny Inspektorat Ochrony Środowiska)
 The component collects data about air quality in Poland from GIOŚ and present as sensors in Home Assitant.
 
+## How to find station_id
+- go to http://powietrze.gios.gov.pl/pjp/current
+- find on the map a measurement station located closest to your home
+- go to "More info" link
+- look at site address, for ex. for this address http://powietrze.gios.gov.pl/pjp/current/station_details/chart/291 `station_id` is 291
+
 ## Minimal configuration
 ```yaml
 sensor:
@@ -18,7 +24,6 @@ sensor:
 ```
 
 ## Arguments
-
 key | optional | type | default | description
 -- | -- | -- | -- | --
 `station_id` | False | integer | | ID of the measuring station

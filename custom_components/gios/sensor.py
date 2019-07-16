@@ -13,7 +13,7 @@ from homeassistant.util import Throttle
 
 _LOGGER = logging.getLogger(__name__)
 
-__VERSION__ = '0.0.1'
+__VERSION__ = '0.0.2'
 
 STATIONS_URL = 'http://api.gios.gov.pl/pjp-api/rest/station/findAll'
 STATION_URL = 'http://api.gios.gov.pl/pjp-api/rest/station/sensors/{}'
@@ -23,12 +23,30 @@ INDEXES_URL = 'http://api.gios.gov.pl/pjp-api/rest/aqindex/getIndex/{}'
 CONF_STATION_ID = 'station_id'
 
 DEFAULT_NAME = 'GIOŚ'
-
 DEFAULT_ATTRIBUTION = {"Dane dostarczone przez GIOŚ"}
 DEFAULT_SCAN_INTERVAL = timedelta(minutes=30)
 
 VOLUME_MICROGRAMS_PER_CUBIC_METER = 'µg/m³'
 ICON = 'mdi:blur'
+
+ATTR_NAME = 'name'
+ATTR_INDEX = 'index'
+ATTR_VALUE = 'value'
+ATTR_VALUES = 'values'
+ATTR_ID = 'id'
+ATTR_PARAM = 'param'
+ATTR_PARAM_NAME = 'paramName'
+ATTR_PARAM_CODE = 'paramCode'
+ATTR_INDEX_LEVEL = '{}IndexLevel'
+ATTR_INDEX_LEVEL_NAME = 'indexLevelName'
+ATTR_STATION_NAME = 'stationName'
+ATTR_GEGR_LAT = 'gegrLat'
+ATTR_GEGR_LON = 'gegrLon'
+ATTR_NAME_PL = 'nazwa'
+ATTR_INDEX_PL = 'indeks'
+ATTR_STATION_PL = 'stacja'
+ATTR_LATITUDE_PL = 'szerokość geograficzna'
+ATTR_LONGITUDE_PL = 'długość geograficzna'
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_STATION_ID, None): cv.positive_int,
@@ -72,11 +90,11 @@ class GiosSensor(Entity):
     @property
     def device_state_attributes(self):
         """Return the device state attributes."""
-        self._attrs['nazwa'] = self._state = self.gios.sensors[self.type]['name']
-        self._attrs['indeks'] = self._state = self.gios.sensors[self.type]['index']
-        self._attrs['stacja'] = self.gios.station_name
-        self._attrs['szerokość geograficzna'] = self.gios.latitude
-        self._attrs['długość geograficzna'] = self.gios.longitude
+        self._attrs[ATTR_NAME_PL] = self.gios.sensors[self.type][ATTR_NAME]
+        self._attrs[ATTR_INDEX_PL] = self.gios.sensors[self.type][ATTR_INDEX]
+        self._attrs[ATTR_STATION_PL] = self.gios.station_name
+        self._attrs[ATTR_LATITUDE_PL] = self.gios.latitude
+        self._attrs[ATTR_LONGITUDE_PL] = self.gios.longitude
         return self._attrs
 
     @property
@@ -98,7 +116,8 @@ class GiosSensor(Entity):
     @property
     def state(self):
         """Return the state."""
-        self._state = self.gios.sensors[self.type]['value']
+        self._state = self.gios.sensors[self.type][ATTR_VALUE]
+        _LOGGER.debug("State: %s", self._state)
         if self._state:
             self._state = round(self._state)
             return self._state
@@ -111,6 +130,9 @@ class GiosSensor(Entity):
     async def async_update(self):
         """Get the data from Airly."""
         await self.gios.async_update()
+
+        if not self.gios.sensors[self.type][ATTR_VALUE]:
+            return
 
 
 class GiosData:
@@ -129,37 +151,49 @@ class GiosData:
 
     async def _async_update(self):
         """Update GIOS data."""
-        async with aiohttp.ClientSession() as session:
-            async with session.get(STATIONS_URL) as resp:
-                stations = await resp.json()
-        _LOGGER.debug("Stations data retrieved: %s", resp.status)
-        if resp.status == HTTP_OK:
+        stations = await self.retreive_data(STATIONS_URL)
+        _LOGGER.debug("All stations data retrieved")
+        if stations:
             for station in stations:
-                if station['id'] == self.station_id:
-                    self.latitude = station['gegrLat']
-                    self.longitude = station['gegrLon']
-                    self.station_name = station['stationName']
+                if station[ATTR_ID] == self.station_id:
+                    self.latitude = station[ATTR_GEGR_LAT]
+                    self.longitude = station[ATTR_GEGR_LON]
+                    self.station_name = station[ATTR_STATION_NAME]
 
-        async with aiohttp.ClientSession() as session:
-            async with session.get(STATION_URL.format(self.station_id)) as resp:
-                station_data = await resp.json()
-        _LOGGER.debug("Station %s data retrieved: %s", self.station_id, resp.status)
-        if resp.status == HTTP_OK:
+        url = STATION_URL.format(self.station_id)
+        station_data = await self.retreive_data(url)
+        _LOGGER.debug("Station %s data retrieved", self.station_id)
+        if station_data:
             for i in range(len(station_data)):
-                self.sensors[station_data[i]['param']['paramCode']] = {'id': station_data[i]['id'], 'name': station_data[i]['param']['paramName']}
+                self.sensors[station_data[i][ATTR_PARAM][ATTR_PARAM_CODE]] = {
+                    ATTR_ID: station_data[i][ATTR_ID],
+                    ATTR_NAME: station_data[i][ATTR_PARAM][ATTR_PARAM_NAME]
+                }
 
         for sensor in self.sensors:
-            async with aiohttp.ClientSession() as session:
-                async with session.get(SENSOR_URL.format(self.sensors[sensor]['id'])) as resp:
-                    sensor_data = await resp.json()
-            _LOGGER.debug("Sensor data retrieved: %s", resp.status)
-            if resp.status == HTTP_OK:
-                self.sensors[sensor]['value'] = sensor_data['values'][0]['value']
+            url = SENSOR_URL.format(self.sensors[sensor][ATTR_ID])
+            sensor_data = await self.retreive_data(url)
+            _LOGGER.debug("Sensor data retrieved")
+            if sensor_data:
+                self.sensors[sensor][ATTR_VALUE] = (sensor_data[ATTR_VALUES][0]
+                        [ATTR_VALUE])
 
-        async with aiohttp.ClientSession() as session:
-            async with session.get(INDEXES_URL.format(self.station_id)) as resp:
-                indexes_data = await resp.json()
-        _LOGGER.debug("Indexes data retrieved: %s", resp.status)
-        if resp.status == HTTP_OK:
+        url = INDEXES_URL.format(self.station_id)
+        indexes_data = await self.retreive_data(url)
+        _LOGGER.debug("Indexes data retrieved")
+        if indexes_data:
             for sensor in self.sensors:
-                self.sensors[sensor]['index'] = indexes_data['{}IndexLevel'.format(sensor.lower().replace('.',''))]['indexLevelName'].lower()
+                index_level = (ATTR_INDEX_LEVEL.format(sensor.lower()
+                        .replace('.','')))
+                self.sensors[sensor][ATTR_INDEX] = (indexes_data[index_level]
+                        [ATTR_INDEX_LEVEL_NAME].lower())
+
+    async def retreive_data(self, url):
+        """Retreive data from GIOS site."""
+        data = None
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as resp:
+                data = await resp.json()
+        _LOGGER.debug("Data retrieved from %s", url)
+        if resp.status == HTTP_OK:
+            return data

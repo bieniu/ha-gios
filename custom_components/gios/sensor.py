@@ -6,14 +6,14 @@ import voluptuous as vol
 
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.const import (CONF_NAME, CONF_SCAN_INTERVAL, HTTP_OK,
-                                 CONTENT_TYPE_JSON, ATTR_ATTRIBUTION)
+                                 ATTR_ATTRIBUTION)
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.entity import Entity
 from homeassistant.util import Throttle
 
 _LOGGER = logging.getLogger(__name__)
 
-__VERSION__ = '0.0.2'
+__VERSION__ = '0.0.3'
 
 STATIONS_URL = 'http://api.gios.gov.pl/pjp-api/rest/station/findAll'
 STATION_URL = 'http://api.gios.gov.pl/pjp-api/rest/station/sensors/{}'
@@ -151,17 +151,23 @@ class GiosData:
 
     async def _async_update(self):
         """Update GIOS data."""
-        stations = await self.retreive_data(STATIONS_URL)
+        station_available = False
+        stations = await self.async_retreive_data(STATIONS_URL)
         _LOGGER.debug("All stations data retrieved")
         if stations:
             for station in stations:
                 if station[ATTR_ID] == self.station_id:
+                    station_available = True
                     self.latitude = station[ATTR_GEGR_LAT]
                     self.longitude = station[ATTR_GEGR_LON]
                     self.station_name = station[ATTR_STATION_NAME]
+            if not station_available:
+                _LOGGER.error("Wrong station_id. There is no station %s!",
+                              self.station_id)
+                return
 
         url = STATION_URL.format(self.station_id)
-        station_data = await self.retreive_data(url)
+        station_data = await self.async_retreive_data(url)
         _LOGGER.debug("Station %s data retrieved", self.station_id)
         if station_data:
             for i in range(len(station_data)):
@@ -172,14 +178,15 @@ class GiosData:
 
         for sensor in self.sensors:
             url = SENSOR_URL.format(self.sensors[sensor][ATTR_ID])
-            sensor_data = await self.retreive_data(url)
-            _LOGGER.debug("Sensor data retrieved")
+            sensor_data = await self.async_retreive_data(url)
+            _LOGGER.debug("Sensor %s data retrieved",
+                          self.sensors[sensor][ATTR_ID])
             if sensor_data:
                 self.sensors[sensor][ATTR_VALUE] = (sensor_data[ATTR_VALUES][0]
                         [ATTR_VALUE])
 
         url = INDEXES_URL.format(self.station_id)
-        indexes_data = await self.retreive_data(url)
+        indexes_data = await self.async_retreive_data(url)
         _LOGGER.debug("Indexes data retrieved")
         if indexes_data:
             for sensor in self.sensors:
@@ -188,12 +195,18 @@ class GiosData:
                 self.sensors[sensor][ATTR_INDEX] = (indexes_data[index_level]
                         [ATTR_INDEX_LEVEL_NAME].lower())
 
-    async def retreive_data(self, url):
-        """Retreive data from GIOS site."""
+    async def async_retreive_data(self, url):
+        """Retreive data from GIOS site via aiohttp."""
         data = None
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url) as resp:
-                data = await resp.json()
-        _LOGGER.debug("Data retrieved from %s", url)
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url) as resp:
+                    data = await resp.json()
+        except aiohttp.ClientError as error:
+            _LOGGER.error("Could not fetch data: %s", error)
+            return
+        _LOGGER.debug("Data retrieved from GIOS, status: %s", resp.status)
         if resp.status == HTTP_OK:
             return data
+        else:
+            _LOGGER.error("Could not fetch data, status: %s", resp.status)

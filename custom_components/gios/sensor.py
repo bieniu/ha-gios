@@ -13,7 +13,7 @@ from homeassistant.util import Throttle
 
 _LOGGER = logging.getLogger(__name__)
 
-__VERSION__ = '0.0.3'
+__VERSION__ = '0.1.0'
 
 STATIONS_URL = 'http://api.gios.gov.pl/pjp-api/rest/station/findAll'
 STATION_URL = 'http://api.gios.gov.pl/pjp-api/rest/station/sensors/{}'
@@ -21,14 +21,22 @@ SENSOR_URL = 'http://api.gios.gov.pl/pjp-api/rest/data/getData/{}'
 INDEXES_URL = 'http://api.gios.gov.pl/pjp-api/rest/aqindex/getIndex/{}'
 
 CONF_STATION_ID = 'station_id'
+CONF_IGNORED_CONDITIONS = 'ignored_conditions'
 
 DEFAULT_NAME = 'GIOŚ'
-DEFAULT_ATTRIBUTION = {"Dane dostarczone przez GIOŚ"}
+DEFAULT_ATTRIBUTION = {"Data provided by GIOŚ"}
 DEFAULT_SCAN_INTERVAL = timedelta(minutes=30)
 
 VOLUME_MICROGRAMS_PER_CUBIC_METER = 'µg/m³'
 ICON = 'mdi:blur'
 
+ATTR_PM10 = 'pm10'
+ATTR_PM25 = 'pm25'
+ATTR_NO2 = 'no2'
+ATTR_C6H6 = 'c6h6'
+ATTR_SO2 = 'so2'
+ATTR_O3 = 'o3'
+ATTR_CO = 'co'
 ATTR_NAME = 'name'
 ATTR_INDEX = 'index'
 ATTR_VALUE = 'value'
@@ -42,15 +50,18 @@ ATTR_INDEX_LEVEL_NAME = 'indexLevelName'
 ATTR_STATION_NAME = 'stationName'
 ATTR_GEGR_LAT = 'gegrLat'
 ATTR_GEGR_LON = 'gegrLon'
-ATTR_NAME_PL = 'nazwa'
-ATTR_INDEX_PL = 'indeks'
-ATTR_STATION_PL = 'stacja'
-ATTR_LATITUDE_PL = 'szerokość geograficzna'
-ATTR_LONGITUDE_PL = 'długość geograficzna'
+ATTR_STATION = 'station'
+ATTR_LATITUDE = 'latitude'
+ATTR_LONGITUDE = 'longitude'
+
+SENSOR_TYPES = {ATTR_PM10, ATTR_PM25, ATTR_NO2, ATTR_C6H6, ATTR_SO2, ATTR_O3,
+                ATTR_CO}
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_STATION_ID, None): cv.positive_int,
     vol.Optional(CONF_NAME, default=DEFAULT_NAME): cv.string,
+    vol.Optional(CONF_IGNORED_CONDITIONS, default=[]):
+        vol.All(cv.ensure_list, [vol.In(SENSOR_TYPES)]),
     vol.Optional(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL):
         cv.time_period
 })
@@ -59,7 +70,6 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
 async def async_setup_platform(
         hass, config, async_add_entities, discovery_info=None):
     """Configure the platform and add the sensors."""
-
     name = config.get(CONF_NAME)
     station_id = config.get(CONF_STATION_ID)
     _LOGGER.debug("Using station_id: %s", station_id)
@@ -69,8 +79,10 @@ async def async_setup_platform(
     await data.async_update()
 
     sensors = []
+    ignored_conditions = config[CONF_IGNORED_CONDITIONS]
     for sensor in data.sensors:
-        sensors.append(GiosSensor(name, sensor, data))
+        if not sensor.replace('.', '').lower() in ignored_conditions:
+            sensors.append(GiosSensor(name, sensor, data))
     async_add_entities(sensors, True)
 
 
@@ -90,11 +102,11 @@ class GiosSensor(Entity):
     @property
     def device_state_attributes(self):
         """Return the device state attributes."""
-        self._attrs[ATTR_NAME_PL] = self.gios.sensors[self.type][ATTR_NAME]
-        self._attrs[ATTR_INDEX_PL] = self.gios.sensors[self.type][ATTR_INDEX]
-        self._attrs[ATTR_STATION_PL] = self.gios.station_name
-        self._attrs[ATTR_LATITUDE_PL] = self.gios.latitude
-        self._attrs[ATTR_LONGITUDE_PL] = self.gios.longitude
+        self._attrs[ATTR_NAME] = self.gios.sensors[self.type][ATTR_NAME]
+        self._attrs[ATTR_INDEX] = self.gios.sensors[self.type][ATTR_INDEX]
+        self._attrs[ATTR_STATION] = self.gios.station_name
+        self._attrs[ATTR_LATITUDE] = self.gios.latitude
+        self._attrs[ATTR_LONGITUDE] = self.gios.longitude
         return self._attrs
 
     @property
@@ -117,7 +129,6 @@ class GiosSensor(Entity):
     def state(self):
         """Return the state."""
         self._state = self.gios.sensors[self.type][ATTR_VALUE]
-        _LOGGER.debug("State: %s", self._state)
         if self._state:
             self._state = round(self._state)
             return self._state
@@ -128,10 +139,12 @@ class GiosSensor(Entity):
         return self._unit_of_measurement
 
     async def async_update(self):
-        """Get the data from Airly."""
+        """Get the data from GIOS."""
         await self.gios.async_update()
 
         if not self.gios.sensors[self.type][ATTR_VALUE]:
+            _LOGGER.error("No value for %s sensor value in GIOS data!",
+                          self.type)
             return
 
 
@@ -210,3 +223,4 @@ class GiosData:
             return data
         else:
             _LOGGER.error("Could not fetch data, status: %s", resp.status)
+            return

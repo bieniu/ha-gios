@@ -13,7 +13,7 @@ from homeassistant.util import Throttle
 
 _LOGGER = logging.getLogger(__name__)
 
-__VERSION__ = '0.1.0'
+__VERSION__ = '0.1.1'
 
 STATIONS_URL = 'http://api.gios.gov.pl/pjp-api/rest/station/findAll'
 STATION_URL = 'http://api.gios.gov.pl/pjp-api/rest/station/sensors/{}'
@@ -51,8 +51,6 @@ ATTR_STATION_NAME = 'stationName'
 ATTR_GEGR_LAT = 'gegrLat'
 ATTR_GEGR_LON = 'gegrLon'
 ATTR_STATION = 'station'
-ATTR_LATITUDE = 'latitude'
-ATTR_LONGITUDE = 'longitude'
 
 SENSOR_TYPES = {ATTR_PM10, ATTR_PM25, ATTR_NO2, ATTR_C6H6, ATTR_SO2, ATTR_O3,
                 ATTR_CO}
@@ -105,8 +103,6 @@ class GiosSensor(Entity):
         self._attrs[ATTR_NAME] = self.gios.sensors[self.type][ATTR_NAME]
         self._attrs[ATTR_INDEX] = self.gios.sensors[self.type][ATTR_INDEX]
         self._attrs[ATTR_STATION] = self.gios.station_name
-        self._attrs[ATTR_LATITUDE] = self.gios.latitude
-        self._attrs[ATTR_LONGITUDE] = self.gios.longitude
         return self._attrs
 
     @property

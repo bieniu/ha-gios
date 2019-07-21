@@ -39,4 +39,4 @@ key | optional | type | default | description
 `ignored_conditions` | True | list | | list of ignored conditions, available: `c6h6`, `co`, `no2`, `o3`, `pm25`, `pm10`, `so2`
 
 [releases]: https://github.com/bieniu/ha-gios/releases
-[releases-shield]: https://img.shields.io/github/release/bieniu/ha-airly.svg?style=popout
+[releases-shield]: https://img.shields.io/github/release/bieniu/ha-gios.svg?style=popout

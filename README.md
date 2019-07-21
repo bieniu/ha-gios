@@ -1,4 +1,5 @@
 # GIOŚ (Główny Inspektorat Ochrony Środowiska)
+[![GitHub Release][releases-shield]][releases]
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs)
 
 ![Screenshot](https://github.com/bieniu/ha-gios/blob/master/images/gios-ha.png?raw=true)
@@ -36,3 +37,5 @@ key | optional | type | default | description
 `station_id` | False | integer | | ID of the measuring station
 `scan_interval` | True | integer | 1800 | rate in seconds at which GIOŚ should be polled for new data, GIOS API regulations prohibit pool for data more often than every 30 minutes
 `ignored_conditions` | True | list | | list of ignored conditions, available: `c6h6`, `co`, `no2`, `o3`, `pm25`, `pm10`, `so2`
+
+[releases]: https://github.com/bieniu/ha-gios/releases

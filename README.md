@@ -1,6 +1,7 @@
 # GIOŚ (Główny Inspektorat Ochrony Środowiska)
 [![GitHub Release][releases-shield]][releases]
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs)
+[![Community Forum][forum-shield]][forum]
 
 ![Screenshot](https://github.com/bieniu/ha-gios/blob/master/images/gios-ha.png?raw=true)
 
@@ -40,3 +41,6 @@ key | optional | type | default | description
 
 [releases]: https://github.com/bieniu/ha-gios/releases
 [releases-shield]: https://img.shields.io/github/release/bieniu/ha-gios.svg?style=popout
+[forum]: https://community.home-assistant.io/t/gios-polish-glowny-inspektorat-ochrony-srodowiska-air-quality-data-integration/127519
+[forum-shield]: https://img.shields.io/badge/community-forum-brightgreen.svg?style=popout
+

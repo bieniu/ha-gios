@@ -37,7 +37,7 @@ key | optional | type | default | description
 -- | -- | -- | -- | --
 `station_id` | False | integer | | ID of the measuring station
 `scan_interval` | True | integer | 1800 | rate in seconds at which GIOŚ should be polled for new data, GIOS API regulations prohibit pool for data more often than every 30 minutes
-`ignored_conditions` | True | list | | list of ignored conditions, available: `c6h6`, `co`, `no2`, `o3`, `pm25`, `pm10`, `so2`
+`ignored_conditions` | True | list | | list of ignored conditions, available: `c6h6`, `co`, `no2`, `o3`, `pm25`, `pm10`, `so2`, `aqi`
 
 [releases]: https://github.com/bieniu/ha-gios/releases
 [releases-shield]: https://img.shields.io/github/release/bieniu/ha-gios.svg?style=popout

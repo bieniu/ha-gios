@@ -1,0 +1,19 @@
+{
+    "config": {
+        "title": "Główny Inspektorat Ochrony Środowiska (GIOŚ)",
+        "step": {
+            "user": {
+                "title": "Główny Inspektorat Ochrony Środowiska (GIOŚ)",
+                "description": "Jeśli potrzebujesz pomocy z konfiguracją, przejdź na stronę: https://github.com/bieniu/ha-gios",
+                "data": {
+                    "name": "Nazwa integracji",
+                    "station_id": "ID stacji pomiarowej"
+                }
+            }
+        },
+        "error": {
+            "name_exists": "Nazwa już istnieje.",
+            "wrong_station_id": "ID stacji pomiarowej nie jest poprawne."
+        }
+    }
+}

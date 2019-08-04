@@ -14,7 +14,7 @@ from .const import DOMAIN, DEFAULT_NAME, CONF_STATION_ID, STATIONS_URL, ATTR_ID
 
 _LOGGER = logging.getLogger(__name__)
 
-__VERSION__ = "0.2.0"
+__VERSION__ = "0.2.1"
 
 STATION_URL = "http://api.gios.gov.pl/pjp-api/rest/station/sensors/{}"
 SENSOR_URL = "http://api.gios.gov.pl/pjp-api/rest/data/getData/{}"
@@ -123,8 +123,8 @@ class GiosSensor(Entity):
         self._unit_of_measurement = VOLUME_MICROGRAMS_PER_CUBIC_METER
 
     @property
-    def device_state_attributes(self):
-        """Return the device state attributes."""
+    def state_attributes(self):
+        """Return the state attributes."""
         self._attrs[ATTR_STATION] = self.gios.station_name
         if self.type != ATTR_AQI:
             self._attrs[ATTR_INDEX] = self.gios.sensors[self.type][ATTR_INDEX]

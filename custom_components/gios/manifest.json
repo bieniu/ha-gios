@@ -6,5 +6,6 @@
     "codeowners": [
         "@bieniu"
     ],
-    "requirements": []
+    "requirements": [],
+    "config_flow": true
 }

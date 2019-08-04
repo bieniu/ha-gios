@@ -10,19 +10,18 @@ import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.entity import Entity
 from homeassistant.util import Throttle
 
+from .const import DOMAIN, DEFAULT_NAME, CONF_STATION_ID, STATIONS_URL, ATTR_ID
+
 _LOGGER = logging.getLogger(__name__)
 
-__VERSION__ = "0.1.2"
+__VERSION__ = "0.2.0"
 
-STATIONS_URL = "http://api.gios.gov.pl/pjp-api/rest/station/findAll"
 STATION_URL = "http://api.gios.gov.pl/pjp-api/rest/station/sensors/{}"
 SENSOR_URL = "http://api.gios.gov.pl/pjp-api/rest/data/getData/{}"
 INDEXES_URL = "http://api.gios.gov.pl/pjp-api/rest/aqindex/getIndex/{}"
 
-CONF_STATION_ID = "station_id"
 CONF_IGNORED_CONDITIONS = "ignored_conditions"
 
-DEFAULT_NAME = "GIOŚ"
 DEFAULT_ATTRIBUTION = {"Data provided by GIOŚ"}
 DEFAULT_SCAN_INTERVAL = timedelta(minutes=30)
 
@@ -41,7 +40,6 @@ ATTR_NAME = "name"
 ATTR_INDEX = "index"
 ATTR_VALUE = "value"
 ATTR_VALUES = "values"
-ATTR_ID = "id"
 ATTR_PARAM = "param"
 ATTR_PARAM_NAME = "paramName"
 ATTR_PARAM_CODE = "paramCode"
@@ -94,6 +92,23 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     async_add_entities(sensors, True)
 
 
+async def async_setup_entry(hass, config_entry, async_add_entities):
+    """Add a GIOS entities from a config_entry."""
+    station_id = config_entry.data[CONF_STATION_ID]
+    name = config_entry.data[CONF_NAME]
+    scan_interval = DEFAULT_SCAN_INTERVAL
+    _LOGGER.debug("Using station_id: %s", station_id)
+
+    data = GiosData(station_id, scan_interval=scan_interval)
+
+    await data.async_update()
+
+    sensors = []
+    for sensor in data.sensors:
+        sensors.append(GiosSensor(name, sensor, data))
+    async_add_entities(sensors, True)
+
+
 class GiosSensor(Entity):
     """Define an GIOS sensor."""
 
@@ -124,7 +139,21 @@ class GiosSensor(Entity):
     @property
     def icon(self):
         """Return the icon."""
-        return self._icon
+        if self.type == ATTR_AQI:
+            if self._state == "bardzo dobry":
+                return "mdi:emoticon-excited"
+            elif self._state == "dobry":
+                return "mdi:emoticon-happy"
+            elif self._state == "umiarkowany":
+                return "mdi:emoticon-neutral"
+            elif self._state == "dostateczny":
+                return "mdi:emoticon-sad"
+            elif self._state == "zły":
+                return "mdi:emoticon-dead"
+            else:
+                return self._icon
+        else:
+            return self._icon
 
     @property
     def unique_id(self):

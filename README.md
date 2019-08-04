@@ -5,7 +5,7 @@
 
 ![Screenshot](https://github.com/bieniu/ha-gios/blob/master/images/gios-ha.png?raw=true)
 
-The component collects data about air quality in Poland from [GIOŚ](http://powietrze.gios.gov.pl/pjp/current) and present as sensors in Home Assitant.
+The integration collects data about air quality in Poland from [GIOŚ](http://powietrze.gios.gov.pl/pjp/current) and present as sensors in Home Assitant. You can add this to Home Assistant via `Configuration -> Integrations -> Add -> Airly` or `configuration.yaml` file. You can add this integration several times for different locations, e.g. home and work.
 
 ## How to find station_id
 - go to http://powietrze.gios.gov.pl/pjp/current

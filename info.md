@@ -1,5 +1,7 @@
 ![Screenshot](https://github.com/bieniu/ha-gios/blob/master/images/gios-ha.png?raw=true)
 
+You can add this integration to Home Assistant via `Configuration -> Integrations -> Add -> Airly` or `configuration.yaml` file. You can add this integration several times for different locations, e.g. home and work.
+
 ## How to find station_id
 - go to http://powietrze.gios.gov.pl/pjp/current
 - find on the map a measurement station located closest to your home

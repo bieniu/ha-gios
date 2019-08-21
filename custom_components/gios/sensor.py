@@ -268,4 +268,3 @@ class GiosData:
         if resp.status != HTTP_OK:
             _LOGGER.error("Could not fetch data, status: %s", resp.status)
         return data
-

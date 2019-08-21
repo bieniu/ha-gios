@@ -234,9 +234,14 @@ class GiosData:
                 sensor_data = await self.async_retreive_data(url)
                 _LOGGER.debug("Sensor %s data retrieved", self.sensors[sensor][ATTR_ID])
                 if sensor_data:
-                    self.sensors[sensor][ATTR_VALUE] = sensor_data[ATTR_VALUES][0][
-                        ATTR_VALUE
-                    ]
+                    if sensor_data[ATTR_VALUES][0][ATTR_VALUE]:
+                        self.sensors[sensor][ATTR_VALUE] = sensor_data[ATTR_VALUES][0][
+                            ATTR_VALUE
+                        ]
+                    else:
+                        self.sensors[sensor][ATTR_VALUE] = sensor_data[ATTR_VALUES][1][
+                            ATTR_VALUE
+                        ]
 
         url = INDEXES_URL.format(self.station_id)
         indexes_data = await self.async_retreive_data(url)

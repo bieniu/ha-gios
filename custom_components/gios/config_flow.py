@@ -4,7 +4,6 @@ import voluptuous as vol
 
 from homeassistant.const import CONF_NAME
 from homeassistant.core import callback
-import homeassistant.helpers.config_validation as cv
 from homeassistant import config_entries, data_entry_flow
 
 from .const import DOMAIN, DEFAULT_NAME, CONF_STATION_ID, ATTR_ID, STATIONS_URL

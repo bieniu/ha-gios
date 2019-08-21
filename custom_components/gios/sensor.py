@@ -1,3 +1,10 @@
+"""
+Support for the GIOŚ service.
+
+For more details about this platform, please refer to the documentation at
+https://github.com/bieniu/ha-gios
+"""
+
 from datetime import timedelta
 import logging
 import aiohttp
@@ -10,11 +17,11 @@ import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.entity import Entity
 from homeassistant.util import Throttle
 
-from .const import DOMAIN, DEFAULT_NAME, CONF_STATION_ID, STATIONS_URL, ATTR_ID
+from .const import DEFAULT_NAME, CONF_STATION_ID, STATIONS_URL, ATTR_ID
 
 _LOGGER = logging.getLogger(__name__)
 
-__VERSION__ = "0.2.1"
+__VERSION__ = "0.2.2"
 
 STATION_URL = "http://api.gios.gov.pl/pjp-api/rest/station/sensors/{}"
 SENSOR_URL = "http://api.gios.gov.pl/pjp-api/rest/data/getData/{}"
@@ -112,10 +119,10 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
 class GiosSensor(Entity):
     """Define an GIOS sensor."""
 
-    def __init__(self, name, type, data):
+    def __init__(self, name, kind, data):
         """Initialize."""
         self._name = name
-        self.type = type
+        self.kind = kind
         self.gios = data
         self._state = None
         self._attrs = {ATTR_ATTRIBUTION: DEFAULT_ATTRIBUTION}
@@ -126,63 +133,58 @@ class GiosSensor(Entity):
     def state_attributes(self):
         """Return the state attributes."""
         self._attrs[ATTR_STATION] = self.gios.station_name
-        if self.type != ATTR_AQI:
-            self._attrs[ATTR_INDEX] = self.gios.sensors[self.type][ATTR_INDEX]
-            self._attrs[ATTR_NAME] = self.gios.sensors[self.type][ATTR_NAME]
+        if self.kind != ATTR_AQI:
+            self._attrs[ATTR_INDEX] = self.gios.sensors[self.kind][ATTR_INDEX]
+            self._attrs[ATTR_NAME] = self.gios.sensors[self.kind][ATTR_NAME]
         return self._attrs
 
     @property
     def name(self):
         """Return the name."""
-        return "{} {}".format(self._name, self.type)
+        return "{} {}".format(self._name, self.kind)
 
     @property
     def icon(self):
         """Return the icon."""
-        if self.type == ATTR_AQI:
+        if self.kind == ATTR_AQI:
             if self._state == "bardzo dobry":
-                return "mdi:emoticon-excited"
+                self._icon = "mdi:emoticon-excited"
             elif self._state == "dobry":
-                return "mdi:emoticon-happy"
+                self._icon = "mdi:emoticon-happy"
             elif self._state == "umiarkowany":
-                return "mdi:emoticon-neutral"
+                self._icon = "mdi:emoticon-neutral"
             elif self._state == "dostateczny":
-                return "mdi:emoticon-sad"
+                self._icon = "mdi:emoticon-sad"
             elif self._state == "zły":
-                return "mdi:emoticon-dead"
-            else:
-                return self._icon
-        else:
-            return self._icon
+                self._icon = "mdi:emoticon-dead"
+        return self._icon
 
     @property
     def unique_id(self):
         """Return a unique_id for this entity."""
-        return "{}-{}-{}".format(self.gios.latitude, self.gios.longitude, self.type)
+        return "{}-{}-{}".format(self.gios.latitude, self.gios.longitude, self.kind)
 
     @property
     def state(self):
         """Return the state."""
-        self._state = self.gios.sensors[self.type][ATTR_VALUE]
+        self._state = self.gios.sensors[self.kind][ATTR_VALUE]
         if self._state:
-            if self.type == ATTR_AQI:
-                return self._state
-            else:
+            if self.kind != ATTR_AQI:
                 self._state = round(self._state)
-                return self._state
+            return self._state
 
     @property
     def unit_of_measurement(self):
         """Return the unit the value is expressed in."""
-        if self.type != ATTR_AQI:
+        if self.kind != ATTR_AQI:
             return self._unit_of_measurement
 
     async def async_update(self):
         """Get the data from GIOS."""
         await self.gios.async_update()
 
-        if not self.gios.sensors[self.type][ATTR_VALUE]:
-            _LOGGER.error("No value for %s sensor value in GIOS data!", self.type)
+        if not self.gios.sensors[self.kind][ATTR_VALUE]:
+            _LOGGER.error("No value for %s sensor value in GIOS data!", self.kind)
             return
 
 
@@ -215,16 +217,15 @@ class GiosData:
                 _LOGGER.error(
                     "Wrong station_id. There is no station %s!", self.station_id
                 )
-                return
 
         url = STATION_URL.format(self.station_id)
         station_data = await self.async_retreive_data(url)
         _LOGGER.debug("Station %s data retrieved", self.station_id)
         if station_data:
-            for i in range(len(station_data)):
-                self.sensors[station_data[i][ATTR_PARAM][ATTR_PARAM_CODE]] = {
-                    ATTR_ID: station_data[i][ATTR_ID],
-                    ATTR_NAME: station_data[i][ATTR_PARAM][ATTR_PARAM_NAME],
+            for sensor in station_data:
+                self.sensors[sensor[ATTR_PARAM][ATTR_PARAM_CODE]] = {
+                    ATTR_ID: sensor[ATTR_ID],
+                    ATTR_NAME: sensor[ATTR_PARAM][ATTR_PARAM_NAME],
                 }
 
         for sensor in self.sensors:
@@ -263,10 +264,8 @@ class GiosData:
                     data = await resp.json()
         except aiohttp.ClientError as error:
             _LOGGER.error("Could not fetch data: %s", error)
-            return
         _LOGGER.debug("Data retrieved from GIOS, status: %s", resp.status)
-        if resp.status == HTTP_OK:
-            return data
-        else:
+        if resp.status != HTTP_OK:
             _LOGGER.error("Could not fetch data, status: %s", resp.status)
-            return
+        return data
+

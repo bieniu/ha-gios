@@ -21,7 +21,7 @@ from .const import DEFAULT_NAME, CONF_STATION_ID, STATIONS_URL, ATTR_ID
 
 _LOGGER = logging.getLogger(__name__)
 
-__VERSION__ = "0.2.2"
+__VERSION__ = "0.2.3"
 
 STATION_URL = "http://api.gios.gov.pl/pjp-api/rest/station/sensors/{}"
 SENSOR_URL = "http://api.gios.gov.pl/pjp-api/rest/data/getData/{}"

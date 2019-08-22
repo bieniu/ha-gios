@@ -17,8 +17,7 @@ def configured_instances(hass):
     )
 
 
-@config_entries.HANDLERS.register(DOMAIN)
-class GiosFlowHandler(data_entry_flow.FlowHandler):
+class GiosFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     """Config flow for GIOS."""
 
     VERSION = 1

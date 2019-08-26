@@ -22,8 +22,6 @@ from .const import ATTR_ID, CONF_STATION_ID, DEFAULT_NAME, STATIONS_URL
 
 _LOGGER = logging.getLogger(__name__)
 
-__VERSION__ = "0.2.5"
-
 STATION_URL = "http://api.gios.gov.pl/pjp-api/rest/station/sensors/{}"
 SENSOR_URL = "http://api.gios.gov.pl/pjp-api/rest/data/getData/{}"
 INDEXES_URL = "http://api.gios.gov.pl/pjp-api/rest/aqindex/getIndex/{}"

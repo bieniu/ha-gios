@@ -1,6 +1,5 @@
 """The GIOS component."""
 from homeassistant.core import Config, HomeAssistant
-from .config_flow import GiosFlowHandler
 
 
 async def async_setup(hass: HomeAssistant, config: Config) -> bool:

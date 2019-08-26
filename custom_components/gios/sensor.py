@@ -22,7 +22,7 @@ from .const import ATTR_ID, CONF_STATION_ID, DEFAULT_NAME, STATIONS_URL
 
 _LOGGER = logging.getLogger(__name__)
 
-__VERSION__ = "0.2.4"
+__VERSION__ = "0.2.5"
 
 STATION_URL = "http://api.gios.gov.pl/pjp-api/rest/station/sensors/{}"
 SENSOR_URL = "http://api.gios.gov.pl/pjp-api/rest/data/getData/{}"
@@ -142,7 +142,7 @@ class GiosSensor(Entity):
     @property
     def name(self):
         """Return the name."""
-        return "{} {}".format(self._name, self.kind)
+        return f"{self._name} {self.kind}"
 
     @property
     def icon(self):
@@ -163,7 +163,7 @@ class GiosSensor(Entity):
     @property
     def unique_id(self):
         """Return a unique_id for this entity."""
-        return "{}-{}-{}".format(self.gios.latitude, self.gios.longitude, self.kind)
+        return f"{self.gios.latitude}-{self.gios.longitude}-{self.kind}")
 
     @property
     def state(self):

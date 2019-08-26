@@ -163,7 +163,7 @@ class GiosSensor(Entity):
     @property
     def unique_id(self):
         """Return a unique_id for this entity."""
-        return f"{self.gios.latitude}-{self.gios.longitude}-{self.kind}")
+        return f"{self.gios.latitude}-{self.gios.longitude}-{self.kind}"
 
     @property
     def state(self):

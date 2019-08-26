@@ -84,8 +84,8 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
 
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
     """Configure the platform and add the sensors."""
-    name = config.get(CONF_NAME)
-    station_id = config.get(CONF_STATION_ID)
+    name = config[CONF_NAME]
+    station_id = config[CONF_STATION_ID]
     _LOGGER.debug("Using station_id: %s", station_id)
 
     data = GiosData(station_id, scan_interval=config[CONF_SCAN_INTERVAL])

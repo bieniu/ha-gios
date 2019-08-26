@@ -2,11 +2,11 @@
 import aiohttp
 import voluptuous as vol
 
+from homeassistant import config_entries
 from homeassistant.const import CONF_NAME
 from homeassistant.core import callback
-from homeassistant import config_entries, data_entry_flow
 
-from .const import DOMAIN, DEFAULT_NAME, CONF_STATION_ID, ATTR_ID, STATIONS_URL
+from .const import ATTR_ID, CONF_STATION_ID, DEFAULT_NAME, DOMAIN, STATIONS_URL
 
 
 @callback

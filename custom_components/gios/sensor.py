@@ -5,19 +5,20 @@ For more details about this platform, please refer to the documentation at
 https://github.com/bieniu/ha-gios
 """
 
+import asyncio
 from datetime import timedelta
 import logging
-import aiohttp
 
+import aiohttp
 import voluptuous as vol
 
 from homeassistant.components.sensor import PLATFORM_SCHEMA
-from homeassistant.const import CONF_NAME, CONF_SCAN_INTERVAL, HTTP_OK, ATTR_ATTRIBUTION
+from homeassistant.const import ATTR_ATTRIBUTION, CONF_NAME, CONF_SCAN_INTERVAL, HTTP_OK
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.entity import Entity
 from homeassistant.util import Throttle
 
-from .const import DEFAULT_NAME, CONF_STATION_ID, STATIONS_URL, ATTR_ID
+from .const import ATTR_ID, CONF_STATION_ID, DEFAULT_NAME, STATIONS_URL
 
 _LOGGER = logging.getLogger(__name__)
 

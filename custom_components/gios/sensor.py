@@ -26,8 +26,6 @@ STATION_URL = "http://api.gios.gov.pl/pjp-api/rest/station/sensors/{}"
 SENSOR_URL = "http://api.gios.gov.pl/pjp-api/rest/data/getData/{}"
 INDEXES_URL = "http://api.gios.gov.pl/pjp-api/rest/aqindex/getIndex/{}"
 
-CONF_IGNORED_CONDITIONS = "ignored_conditions"
-
 DEFAULT_ATTRIBUTION = {"Data provided by GIOŚ"}
 DEFAULT_SCAN_INTERVAL = timedelta(minutes=30)
 
@@ -72,9 +70,6 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
         vol.Required(CONF_STATION_ID, None): cv.positive_int,
         vol.Optional(CONF_NAME, default=DEFAULT_NAME): cv.string,
-        vol.Optional(CONF_IGNORED_CONDITIONS, default=[]): vol.All(
-            cv.ensure_list, [vol.In(SENSOR_TYPES)]
-        ),
         vol.Optional(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL): cv.time_period,
     }
 )
@@ -91,10 +86,8 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     await data.async_update()
 
     sensors = []
-    ignored_conditions = config[CONF_IGNORED_CONDITIONS]
     for sensor in data.sensors:
-        if not sensor.replace(".", "").lower() in ignored_conditions:
-            sensors.append(GiosSensor(name, sensor, data))
+        sensors.append(GiosSensor(name, sensor, data))
     async_add_entities(sensors, True)
 
 

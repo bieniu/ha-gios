@@ -19,7 +19,20 @@ sensor:
   - platform: gios
     station_id: 530
 ```
-
+{% if version_installed.replace("v", "").replace(".","") | int < 25  %}
+## Custom configuration example
+```yaml
+sensor:
+  - platform: gios
+    station_id: 530
+    name: 'Air Quality'
+    scan_interval: 2700
+    ignored_conditions:
+      - pm25
+      - so2
+```
+{% endif %}
+{% if version_installed.replace("v", "").replace(".","") | int > 24  %}
 ## Custom configuration example
 ```yaml
 sensor:
@@ -28,6 +41,7 @@ sensor:
     name: 'Air Quality'
     scan_interval: 2700
 ```
+{% endif %}
 
 ## Arguments
 key | optional | type | default | description

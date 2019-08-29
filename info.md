@@ -8,10 +8,8 @@ You can add this integration to Home Assistant via `Configuration -> Integration
 - go to "More info" link
 - look at site address, for ex. for this address http://powietrze.gios.gov.pl/pjp/current/station_details/chart/291 `station_id` is 291
 
-{% if version_installed.replace("v", "").replace(".","") | int > 24  %}
 ## Breaking change
-Home Assistant 0.98+ allows disabling unnecessary entities in the entity registry. For this reason, the `monitored_conditions` argument has been removed.
-{% endif %}
+Home Assistant 0.98+ allows disabling unnecessary entities in the entity registry. For this reason, the `ignored_conditions` argument has been removed.
 
 ## Minimal configuration
 ```yaml
@@ -19,20 +17,7 @@ sensor:
   - platform: gios
     station_id: 530
 ```
-{% if version_installed.replace("v", "").replace(".","") | int < 25  %}
-## Custom configuration example
-```yaml
-sensor:
-  - platform: gios
-    station_id: 530
-    name: 'Air Quality'
-    scan_interval: 2700
-    ignored_conditions:
-      - pm25
-      - so2
-```
-{% endif %}
-{% if version_installed.replace("v", "").replace(".","") | int > 24  %}
+
 ## Custom configuration example
 ```yaml
 sensor:
@@ -41,7 +26,6 @@ sensor:
     name: 'Air Quality'
     scan_interval: 2700
 ```
-{% endif %}
 
 ## Arguments
 key | optional | type | default | description

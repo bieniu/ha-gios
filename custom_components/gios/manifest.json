@@ -1,12 +1,10 @@
 {
-    "domain": "gios",
-    "name": "GIOS",
-    "documentation": "https://github.com/bieniu/ha-gios",
-    "dependencies": [],
-    "codeowners": [
-        "@bieniu"
-    ],
-    "homeassistant": "0.98.0",
-    "requirements": [],
-    "config_flow": true
+  "domain": "gios",
+  "name": "GIOS",
+  "documentation": "https://github.com/bieniu/ha-gios",
+  "dependencies": [],
+  "codeowners": ["@bieniu"],
+  "homeassistant": "0.98.0",
+  "requirements": [],
+  "config_flow": true
 }

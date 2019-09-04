@@ -1,19 +1,19 @@
 {
-    "config": {
+  "config": {
+    "title": "Chief Inspectorate Of Environmental Protection (GIOS)",
+    "step": {
+      "user": {
         "title": "Chief Inspectorate Of Environmental Protection (GIOS)",
-        "step": {
-            "user": {
-                "title": "Chief Inspectorate Of Environmental Protection (GIOS)",
-                "description": "If you need help with the configuration have a look here: https://github.com/bieniu/ha-gios",
-                "data": {
-                    "name": "Name of the integration",
-                    "station_id": "ID of the measuring station"
-                }
-            }
-        },
-        "error": {
-            "name_exists": "Name already exists.",
-            "wrond_station_id": "ID of the measuring station is not correct."
+        "description": "If you need help with the configuration have a look here: https://github.com/bieniu/ha-gios",
+        "data": {
+          "name": "Name of the integration",
+          "station_id": "ID of the measuring station"
         }
+      }
+    },
+    "error": {
+      "name_exists": "Name already exists.",
+      "wrond_station_id": "ID of the measuring station is not correct."
     }
+  }
 }

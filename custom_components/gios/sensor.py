@@ -191,7 +191,7 @@ class GiosData:
     async def _async_update(self):
         """Update GIOS data."""
         station_available = False
-        stations = await self.async_retreive_data(STATIONS_URL)
+        stations = await self._async_retreive_data(STATIONS_URL)
         _LOGGER.debug("All stations data retrieved")
         if stations:
             for station in stations:
@@ -206,7 +206,7 @@ class GiosData:
                 )
 
         url = STATION_URL.format(self.station_id)
-        station_data = await self.async_retreive_data(url)
+        station_data = await self._async_retreive_data(url)
         _LOGGER.debug("Station %s data retrieved", self.station_id)
         if station_data:
             for sensor in station_data:
@@ -218,7 +218,7 @@ class GiosData:
         for sensor in self.sensors:
             if sensor != ATTR_AQI:
                 url = SENSOR_URL.format(self.sensors[sensor][ATTR_ID])
-                sensor_data = await self.async_retreive_data(url)
+                sensor_data = await self._async_retreive_data(url)
                 _LOGGER.debug("Sensor %s data retrieved", self.sensors[sensor][ATTR_ID])
                 if sensor_data:
                     if sensor_data[ATTR_VALUES][0][ATTR_VALUE]:
@@ -231,7 +231,7 @@ class GiosData:
                         ]
 
         url = INDEXES_URL.format(self.station_id)
-        indexes_data = await self.async_retreive_data(url)
+        indexes_data = await self._async_retreive_data(url)
         _LOGGER.debug("Indexes data retrieved")
         if indexes_data:
             for sensor in self.sensors:
@@ -247,7 +247,7 @@ class GiosData:
                 ATTR_INDEX_LEVEL_NAME
             ].lower()
 
-    async def async_retreive_data(self, url):
+    async def _async_retreive_data(self, url):
         """Retreive data from GIOS site via aiohttp."""
         data = None
         try:

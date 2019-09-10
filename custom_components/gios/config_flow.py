@@ -41,9 +41,9 @@ class GiosFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             if not self._errors:
                 return self.async_create_entry(title=user_input[CONF_NAME], data=user_input)
 
-        return await self._show_config_form(name=DEFAULT_NAME, station_id="")
+        return self._show_config_form(name=DEFAULT_NAME, station_id="")
 
-    async def _show_config_form(self, name=None, station_id=None):
+    def _show_config_form(self, name=None, station_id=None):
         """Show the configuration form to edit data."""
         return self.async_show_form(
             step_id="user",

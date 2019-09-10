@@ -123,10 +123,10 @@ class GiosSensor(Entity):
     @property
     def state_attributes(self):
         """Return the state attributes."""
-        self._attrs[ATTR_STATION] = self.gios.station_name
+        self._attrs.update({ATTR_STATION: self.gios.station_name})
         if self.kind != ATTR_AQI:
-            self._attrs[ATTR_INDEX] = self.gios.sensors[self.kind][ATTR_INDEX]
-            self._attrs[ATTR_NAME] = self.gios.sensors[self.kind][ATTR_NAME]
+            self._attrs.update({ATTR_INDEX: self.gios.sensors[self.kind][ATTR_INDEX]})
+            self._attrs.update({ATTR_NAME: self.gios.sensors[self.kind][ATTR_NAME]})
         return self._attrs
 
     @property

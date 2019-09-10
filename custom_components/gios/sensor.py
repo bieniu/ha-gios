@@ -159,10 +159,9 @@ class GiosSensor(Entity):
     def state(self):
         """Return the state."""
         self._state = self.gios.sensors[self.kind][ATTR_VALUE]
-        if self._state:
-            if self.kind != ATTR_AQI:
-                self._state = round(self._state)
-            return self._state
+        if self.kind != ATTR_AQI:
+            self._state = round(self._state)
+        return self._state
 
     @property
     def unit_of_measurement(self):

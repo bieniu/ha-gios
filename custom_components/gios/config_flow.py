@@ -32,15 +32,14 @@ class GiosFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         self._errors = {}
 
         if user_input is not None:
-            station_id_valid = await self._test_station_id(user_input["station_id"])
-            if station_id_valid:
-                if user_input[CONF_NAME] not in configured_instances(self.hass):
-                    return self.async_create_entry(
-                        title=user_input[CONF_NAME], data=user_input
-                    )
+            if user_input[CONF_NAME] in configured_instances(self.hass):
                 self._errors[CONF_NAME] = "name_exists"
-            else:
+            station_id_valid = await self._test_station_id(user_input["station_id"])
+            if not station_id_valid:
                 self._errors["base"] = "wrong_station_id"
+
+            if not self._errors:
+                return self.async_create_entry(title=user_input[CONF_NAME], data=user_input)
 
         return await self._show_config_form(name=DEFAULT_NAME, station_id="")
 

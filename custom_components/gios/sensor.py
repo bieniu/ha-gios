@@ -174,10 +174,6 @@ class GiosSensor(Entity):
         """Get the data from GIOS."""
         await self.gios.async_update()
 
-        if not self.gios.sensors[self.kind][ATTR_VALUE]:
-            _LOGGER.error("No value for %s sensor value in GIOS data!", self.kind)
-            return
-
 
 class GiosData:
     """Define an object to hold sensors data."""

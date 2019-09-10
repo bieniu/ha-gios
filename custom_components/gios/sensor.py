@@ -21,48 +21,48 @@ from .const import ATTR_ID, CONF_STATION_ID, DEFAULT_NAME, STATIONS_URL
 
 _LOGGER = logging.getLogger(__name__)
 
-STATION_URL = "http://api.gios.gov.pl/pjp-api/rest/station/sensors/{}"
-SENSOR_URL = "http://api.gios.gov.pl/pjp-api/rest/data/getData/{}"
-INDEXES_URL = "http://api.gios.gov.pl/pjp-api/rest/aqindex/getIndex/{}"
-
-DEFAULT_ATTRIBUTION = {"Data provided by GIOŚ"}
-DEFAULT_SCAN_INTERVAL = timedelta(minutes=30)
-
-VOLUME_MICROGRAMS_PER_CUBIC_METER = "µg/m³"
-ICON = "mdi:blur"
-
-ATTR_PM10 = "PM10"
-ATTR_PM25 = "PM25"
-ATTR_NO2 = "NO2"
-ATTR_C6H6 = "C6H6"
-ATTR_SO2 = "SO2"
-ATTR_O3 = "O3"
-ATTR_CO = "CO"
 ATTR_AQI = "AQI"
-ATTR_NAME = "name"
-ATTR_INDEX = "index"
-ATTR_VALUE = "value"
-ATTR_VALUES = "values"
-ATTR_PARAM = "param"
-ATTR_PARAM_NAME = "paramName"
-ATTR_PARAM_CODE = "paramCode"
-ATTR_INDEX_LEVEL = "{}IndexLevel"
-ATTR_INDEX_LEVEL_NAME = "indexLevelName"
-ATTR_STATION_NAME = "stationName"
+ATTR_C6H6 = "C6H6"
+ATTR_CO = "CO"
 ATTR_GEGR_LAT = "gegrLat"
 ATTR_GEGR_LON = "gegrLon"
+ATTR_INDEX = "index"
+ATTR_INDEX_LEVEL = "{}IndexLevel"
+ATTR_INDEX_LEVEL_NAME = "indexLevelName"
+ATTR_NAME = "name"
+ATTR_NO2 = "NO2"
+ATTR_O3 = "O3"
+ATTR_PARAM = "param"
+ATTR_PARAM_CODE = "paramCode"
+ATTR_PARAM_NAME = "paramName"
+ATTR_PM10 = "PM10"
+ATTR_PM25 = "PM25"
+ATTR_SO2 = "SO2"
 ATTR_ST_INDEX_LEVEL = "stIndexLevel"
 ATTR_STATION = "station"
+ATTR_STATION_NAME = "stationName"
+ATTR_VALUE = "value"
+ATTR_VALUES = "values"
+
+DEFAULT_ATTRIBUTION = {"Data provided by GIOŚ"}
+DEFAULT_ICON = "mdi:blur"
+DEFAULT_SCAN_INTERVAL = timedelta(minutes=30)
+
+INDEXES_URL = "http://api.gios.gov.pl/pjp-api/rest/aqindex/getIndex/{}"
+SENSOR_URL = "http://api.gios.gov.pl/pjp-api/rest/data/getData/{}"
+STATION_URL = "http://api.gios.gov.pl/pjp-api/rest/station/sensors/{}"
+
+VOLUME_MICROGRAMS_PER_CUBIC_METER = "µg/m³"
 
 SENSOR_TYPES = {
+    ATTR_AQI.lower(),
+    ATTR_C6H6.lower(),
+    ATTR_CO.lower(),
+    ATTR_NO2.lower(),
+    ATTR_O3.lower(),
     ATTR_PM10.lower(),
     ATTR_PM25.lower(),
-    ATTR_NO2.lower(),
-    ATTR_C6H6.lower(),
     ATTR_SO2.lower(),
-    ATTR_O3.lower(),
-    ATTR_CO.lower(),
-    ATTR_AQI.lower(),
 }
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
@@ -117,7 +117,7 @@ class GiosSensor(Entity):
         self.gios = data
         self._state = None
         self._attrs = {ATTR_ATTRIBUTION: DEFAULT_ATTRIBUTION}
-        self._icon = ICON
+        self._icon = DEFAULT_ICON
         self._unit_of_measurement = VOLUME_MICROGRAMS_PER_CUBIC_METER
 
     @property

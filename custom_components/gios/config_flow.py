@@ -39,7 +39,9 @@ class GiosFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 self._errors["base"] = "wrong_station_id"
 
             if not self._errors:
-                return self.async_create_entry(title=user_input[CONF_NAME], data=user_input)
+                return self.async_create_entry(
+                    title=user_input[CONF_NAME], data=user_input
+                )
 
         return self._show_config_form(name=DEFAULT_NAME, station_id="")
 

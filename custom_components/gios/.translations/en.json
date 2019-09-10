@@ -13,7 +13,8 @@
     },
     "error": {
       "name_exists": "Name already exists.",
-      "wrond_station_id": "ID of the measuring station is not correct."
+      "wrong_station_id": "ID of the measuring station is not correct.",
+      "station_id_exists": "ID of the measuring station already exists."
     }
   }
 }

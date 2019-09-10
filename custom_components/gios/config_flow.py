@@ -10,10 +10,10 @@ from .const import ATTR_ID, CONF_STATION_ID, DEFAULT_NAME, DOMAIN, STATIONS_URL
 
 
 @callback
-def configured_instances(hass):
+def configured_instances(hass, condition):
     """Return a set of configured GIOS instances."""
     return set(
-        entry.data[CONF_NAME] for entry in hass.config_entries.async_entries(DOMAIN)
+        entry.data[condition] for entry in hass.config_entries.async_entries(DOMAIN)
     )
 
 
@@ -32,8 +32,10 @@ class GiosFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         self._errors = {}
 
         if user_input is not None:
-            if user_input[CONF_NAME] in configured_instances(self.hass):
+            if user_input[CONF_NAME] in configured_instances(self.hass, CONF_NAME):
                 self._errors[CONF_NAME] = "name_exists"
+            if user_input[CONF_STATION_ID] in configured_instances(self.hass, CONF_STATION_ID):
+                self._errors[CONF_STATION_ID] = "station_id_exists"
             station_id_valid = await self._test_station_id(user_input["station_id"])
             if not station_id_valid:
                 self._errors["base"] = "wrong_station_id"

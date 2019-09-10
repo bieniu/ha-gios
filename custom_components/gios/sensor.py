@@ -121,7 +121,7 @@ class GiosSensor(Entity):
         self._unit_of_measurement = VOLUME_MICROGRAMS_PER_CUBIC_METER
 
     @property
-    def state_attributes(self):
+    def device_state_attributes(self):
         """Return the state attributes."""
         self._attrs.update({ATTR_STATION: self.gios.station_name})
         if self.kind != ATTR_AQI:

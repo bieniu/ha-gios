@@ -199,10 +199,14 @@ class GiosData:
                     self.latitude = station[ATTR_GEGR_LAT]
                     self.longitude = station[ATTR_GEGR_LON]
                     self.station_name = station[ATTR_STATION_NAME]
-            if not station_available:
+            try:
+                if not station_available:
+                    raise Exception("Wrong station_id!")
+            except Exception:
                 _LOGGER.error(
                     "Wrong station_id. There is no station %s!", self.station_id
                 )
+                return
 
         url = STATION_URL.format(self.station_id)
         station_data = await self._async_retreive_data(url)

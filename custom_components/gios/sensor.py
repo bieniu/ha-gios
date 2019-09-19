@@ -80,6 +80,9 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     station_id = config[CONF_STATION_ID]
     _LOGGER.debug("Using station_id: %s", station_id)
 
+    _LOGGER.debug(hass.data.get('sensor').entities)
+    _LOGGER.debug(hass.data.get('sensor')._platforms)
+
     data = GiosData(station_id, scan_interval=config[CONF_SCAN_INTERVAL])
 
     await data.async_update()
@@ -159,7 +162,7 @@ class GiosSensor(Entity):
     def state(self):
         """Return the state."""
         self._state = self.gios.sensors[self.kind][ATTR_VALUE]
-        if self.kind != ATTR_AQI:
+        if isinstance(self._state, float):
             self._state = round(self._state)
         return self._state
 

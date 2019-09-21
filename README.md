@@ -16,30 +16,20 @@ The integration collects data about air quality in Poland from [GIOŚ](http://po
 ## Breaking change
 Home Assistant 0.98+ allows disabling unnecessary entities in the entity registry. For this reason, the `monitored_conditions` argument has been removed.
 
-## Minimal configuration
-```yaml
-sensor:
-  - platform: gios
-    station_id: 530
-```
-
-## Custom configuration example
+## Configuration example
 ```yaml
 sensor:
   - platform: gios
     station_id: 530
     name: 'Air Quality'
-    scan_interval: 2700
 ```
 
 ## Arguments
 key | optional | type | default | description
 -- | -- | -- | -- | --
 `station_id` | False | integer | | ID of the measuring station
-`scan_interval` | True | integer | 1800 | rate in seconds at which GIOŚ should be polled for new data, GIOS API regulations prohibit pool for data more often than every 30 minutes
 
 [releases]: https://github.com/bieniu/ha-gios/releases
 [releases-shield]: https://img.shields.io/github/release/bieniu/ha-gios.svg?style=popout
 [forum]: https://community.home-assistant.io/t/gios-polish-glowny-inspektorat-ochrony-srodowiska-air-quality-data-integration/127519
 [forum-shield]: https://img.shields.io/badge/community-forum-brightgreen.svg?style=popout
-

@@ -11,24 +11,15 @@ You can add this integration to Home Assistant via `Configuration -> Integration
 ## Breaking change
 Home Assistant 0.98+ allows disabling unnecessary entities in the entity registry. For this reason, the `ignored_conditions` argument has been removed.
 
-## Minimal configuration
-```yaml
-sensor:
-  - platform: gios
-    station_id: 530
-```
-
-## Custom configuration example
+## Configuration example
 ```yaml
 sensor:
   - platform: gios
     station_id: 530
     name: 'Air Quality'
-    scan_interval: 2700
 ```
 
 ## Arguments
 key | optional | type | default | description
 -- | -- | -- | -- | --
 `station_id` | False | integer | | ID of the measuring station
-`scan_interval` | True | integer | 1800 | rate in seconds at which GIOŚ should be polled for new data, GIOS API regulations prohibit pool for data more often than every 30 minutes

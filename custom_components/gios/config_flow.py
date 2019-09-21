@@ -3,10 +3,18 @@ import aiohttp
 import voluptuous as vol
 
 from homeassistant import config_entries
-from homeassistant.const import CONF_NAME
+from homeassistant.const import CONF_NAME, CONF_SCAN_INTERVAL
 from homeassistant.core import callback
 
-from .const import ATTR_ID, CONF_STATION_ID, DEFAULT_NAME, DOMAIN, STATIONS_URL
+from .const import (
+    _LOGGER,
+    ATTR_ID,
+    CONF_STATION_ID,
+    DEFAULT_NAME,
+    DEFAULT_SCAN_INTERVAL,
+    DOMAIN,
+    STATIONS_URL,
+)
 
 
 @callback
@@ -62,6 +70,21 @@ class GiosFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             errors=self._errors,
         )
 
+    @staticmethod
+    @callback
+    def async_get_options_flow(config_entry):
+        return GiosOptionsFlowHandler(config_entry)
+
+    async def async_step_import(self, import_config):
+        """Import a config entry from configuration.yaml."""
+        if self._async_current_entries():
+            return self.async_abort(reason="single_instance_allowed")
+        _LOGGER.warning(
+            "GIOŚ configuration from configuration.yaml was imported to "
+            "integrations. You can safely remove configuration from configuration.yaml."
+        )
+        return self.async_create_entry(title="configuration.yaml", data=import_config)
+
     async def _test_station_id(self, station_id):
         """Return true if station_id is valid."""
 
@@ -73,3 +96,32 @@ class GiosFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 if station[ATTR_ID] == station_id:
                     return True
         return False
+
+
+class GiosOptionsFlowHandler(config_entries.OptionsFlow):
+    def __init__(self, config_entry):
+        """Initialize Gios options flow."""
+        self.config_entry = config_entry
+
+    async def async_step_init(self, user_input=None):
+        """Manage the options."""
+        return await self.async_step_user()
+
+    async def async_step_user(self, user_input=None):
+        """Handle a flow initialized by the user."""
+        if user_input is not None:
+            return self.async_create_entry(title="", data=user_input)
+
+        return self.async_show_form(
+            step_id="user",
+            data_schema=vol.Schema(
+                {
+                    vol.Optional(
+                        CONF_SCAN_INTERVAL,
+                        default=self.config_entry.options.get(
+                            CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL
+                        ),
+                    ): int
+                }
+            ),
+        )

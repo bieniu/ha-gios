@@ -16,5 +16,14 @@
       "wrong_station_id": "ID of the measuring station is not correct.",
       "station_id_exists": "ID of the measuring station already exists."
     }
+  },
+  "options": {
+    "step": {
+      "user": {
+        "data": {
+          "scan_interval": "Scan interval [s]"
+        }
+      }
+    }
   }
 }

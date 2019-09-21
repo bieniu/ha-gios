@@ -11,15 +11,23 @@ from datetime import timedelta
 import aiohttp
 import voluptuous as vol
 
-import homeassistant.helpers.config_validation as cv
+from homeassistant import config_entries
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.const import ATTR_ATTRIBUTION, CONF_NAME, CONF_SCAN_INTERVAL, HTTP_OK
+import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.entity import Entity
 from homeassistant.util import Throttle
 
-from .const import ATTR_ID, CONF_STATION_ID, DEFAULT_NAME, STATIONS_URL
+from .const import (
+    _LOGGER,
+    ATTR_ID,
+    CONF_STATION_ID,
+    DEFAULT_NAME,
+    DEFAULT_SCAN_INTERVAL,
+    DOMAIN,
+    STATIONS_URL,
+)
 
-_LOGGER = logging.getLogger(__name__)
 
 ATTR_AQI = "AQI"
 ATTR_C6H6 = "C6H6"
@@ -46,7 +54,6 @@ ATTR_VALUES = "values"
 
 DEFAULT_ATTRIBUTION = {"Data provided by GIOŚ"}
 DEFAULT_ICON = "mdi:blur"
-DEFAULT_SCAN_INTERVAL = timedelta(minutes=30)
 
 INDEXES_URL = "http://api.gios.gov.pl/pjp-api/rest/aqindex/getIndex/{}"
 SENSOR_URL = "http://api.gios.gov.pl/pjp-api/rest/data/getData/{}"
@@ -76,31 +83,25 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
 
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
     """Configure the platform and add the sensors."""
-    name = config[CONF_NAME]
-    station_id = config[CONF_STATION_ID]
-    _LOGGER.debug("Using station_id: %s", station_id)
-
-    _LOGGER.debug(hass.data.get('sensor').entities)
-    _LOGGER.debug(hass.data.get('sensor')._platforms)
-
-    data = GiosData(station_id, scan_interval=config[CONF_SCAN_INTERVAL])
-
-    await data.async_update()
-
-    sensors = []
-    for sensor in data.sensors:
-        sensors.append(GiosSensor(name, sensor, data))
-    async_add_entities(sensors, True)
+    del config[CONF_SCAN_INTERVAL]
+    hass.async_create_task(
+        hass.config_entries.flow.async_init(
+            DOMAIN, context={"source": config_entries.SOURCE_IMPORT}, data=config
+        )
+    )
 
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
     """Add a GIOS entities from a config_entry."""
     station_id = config_entry.data[CONF_STATION_ID]
     name = config_entry.data[CONF_NAME]
-    scan_interval = DEFAULT_SCAN_INTERVAL
+    try:
+        scan_interval = config_entry.options[CONF_SCAN_INTERVAL]
+    except KeyError:
+        scan_interval = DEFAULT_SCAN_INTERVAL
     _LOGGER.debug("Using station_id: %s", station_id)
 
-    data = GiosData(station_id, scan_interval=scan_interval)
+    data = GiosData(station_id, scan_interval=timedelta(seconds=scan_interval))
 
     await data.async_update()
 

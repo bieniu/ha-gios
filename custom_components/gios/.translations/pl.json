@@ -16,5 +16,14 @@
       "wrong_station_id": "ID stacji pomiarowej nie jest poprawne.",
       "station_id_exists": "ID stacji pomiarowej już istnieje."
     }
+  },
+  "options": {
+    "step": {
+      "user": {
+        "data": {
+          "scan_interval": "Interwał skanowania [s]"
+        }
+      }
+    }
   }
 }

@@ -127,10 +127,14 @@ class GiosSensor(Entity):
     @property
     def device_state_attributes(self):
         """Return the state attributes."""
-        self._attrs.update({ATTR_STATION: self.gios.station_name})
+        self._attrs[ATTR_STATION] = self.gios.station_name
         if self.kind != ATTR_AQI:
-            self._attrs.update({ATTR_INDEX: self.gios.sensors[self.kind][ATTR_INDEX]})
-            self._attrs.update({ATTR_NAME: self.gios.sensors[self.kind][ATTR_NAME]})
+            try:
+                if self.gios.sensors[self.kind][ATTR_INDEX]:
+                    self._attrs[ATTR_INDEX] = self.gios.sensors[self.kind][ATTR_INDEX]
+                    self._attrs[ATTR_NAME] = self.gios.sensors[self.kind][ATTR_NAME]
+            except KeyError:
+                return self._attrs
         return self._attrs
 
     @property
@@ -241,18 +245,22 @@ class GiosData:
         indexes_data = await self._async_retreive_data(url)
         _LOGGER.debug("Indexes data retrieved")
         if indexes_data:
-            for sensor in self.sensors:
-                if sensor != ATTR_AQI:
-                    index_level = ATTR_INDEX_LEVEL.format(
-                        sensor.lower().replace(".", "")
-                    )
-                    self.sensors[sensor][ATTR_INDEX] = indexes_data[index_level][
-                        ATTR_INDEX_LEVEL_NAME
-                    ].lower()
-            self.sensors[ATTR_AQI] = {ATTR_NAME: ATTR_AQI}
-            self.sensors[ATTR_AQI][ATTR_VALUE] = indexes_data[ATTR_ST_INDEX_LEVEL][
-                ATTR_INDEX_LEVEL_NAME
-            ].lower()
+            try:
+                for sensor in self.sensors:
+                    if sensor != ATTR_AQI:
+                        index_level = ATTR_INDEX_LEVEL.format(
+                            sensor.lower().replace(".", "")
+                        )
+                        self.sensors[sensor][ATTR_INDEX] = indexes_data[index_level][
+                            ATTR_INDEX_LEVEL_NAME
+                        ].lower()
+
+                self.sensors[ATTR_AQI] = {ATTR_NAME: ATTR_AQI}
+                self.sensors[ATTR_AQI][ATTR_VALUE] = indexes_data[ATTR_ST_INDEX_LEVEL][
+                    ATTR_INDEX_LEVEL_NAME
+                ].lower()
+            except TypeError:
+                _LOGGER.warning("Incomplete indexes data.")
 
     async def _async_retreive_data(self, url):
         """Retreive data from GIOS site via aiohttp."""

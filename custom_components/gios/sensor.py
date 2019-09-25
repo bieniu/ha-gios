@@ -177,6 +177,11 @@ class GiosSensor(Entity):
         if self.kind != ATTR_AQI:
             return self._unit_of_measurement
 
+    @property
+    def available(self):
+        """Return True if entity is available."""
+        return self.gios.data_available
+
     async def async_update(self):
         """Get the data from GIOS."""
         await self.gios.async_update()
@@ -192,6 +197,7 @@ class GiosData:
         self.latitude = None
         self.longitude = None
         self.station_name = None
+        self.data_available = True
 
         self.async_update = Throttle(kwargs[CONF_SCAN_INTERVAL])(self._async_update)
 
@@ -236,10 +242,14 @@ class GiosData:
                         self.sensors[sensor][ATTR_VALUE] = sensor_data[ATTR_VALUES][0][
                             ATTR_VALUE
                         ]
-                    else:
+                    elif sensor_data[ATTR_VALUES][1][ATTR_VALUE]:
                         self.sensors[sensor][ATTR_VALUE] = sensor_data[ATTR_VALUES][1][
                             ATTR_VALUE
                         ]
+                    else:
+                        self.data_available = False
+                        _LOGGER.error("Incomplete sensors data.")
+                        return
 
         url = INDEXES_URL.format(self.station_id)
         indexes_data = await self._async_retreive_data(url)

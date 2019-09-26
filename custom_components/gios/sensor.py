@@ -127,14 +127,12 @@ class GiosSensor(Entity):
     @property
     def device_state_attributes(self):
         """Return the state attributes."""
-        self._attrs[ATTR_STATION] = self.gios.station_name
-        if self.kind != ATTR_AQI:
-            try:
+        if self.gios.data_available:
+            self._attrs[ATTR_STATION] = self.gios.station_name
+            if self.kind != ATTR_AQI:
                 if self.gios.sensors[self.kind][ATTR_INDEX]:
                     self._attrs[ATTR_INDEX] = self.gios.sensors[self.kind][ATTR_INDEX]
                     self._attrs[ATTR_NAME] = self.gios.sensors[self.kind][ATTR_NAME]
-            except KeyError:
-                return self._attrs
         return self._attrs
 
     @property
@@ -166,9 +164,13 @@ class GiosSensor(Entity):
     @property
     def state(self):
         """Return the state."""
-        self._state = self.gios.sensors[self.kind][ATTR_VALUE]
-        if isinstance(self._state, float):
-            self._state = round(self._state)
+        if self.gios.data_available:
+            try:
+                self._state = self.gios.sensors[self.kind][ATTR_VALUE]
+                if isinstance(self._state, float):
+                    self._state = round(self._state)
+            except (KeyError, ValueError):
+                _LOGGER.error("No data for %s", [self.kind])
         return self._state
 
     @property

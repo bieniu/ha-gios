@@ -1,5 +1,6 @@
 """Adds config flow for GIOS."""
 import aiohttp
+import logging
 import voluptuous as vol
 
 from homeassistant import config_entries
@@ -16,6 +17,7 @@ from .const import (
     STATIONS_URL,
 )
 
+_LOGGER = logging.getLogger(__name__)
 
 @callback
 def configured_instances(hass, condition):

@@ -28,6 +28,7 @@ from .const import (
     STATIONS_URL,
 )
 
+_LOGGER = logging.getLogger(__name__)
 
 ATTR_AQI = "AQI"
 ATTR_C6H6 = "C6H6"

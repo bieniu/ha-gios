@@ -1,7 +1,4 @@
 """Constants for GIOS integration."""
-import logging
-
-_LOGGER = logging.getLogger(__name__)
 ATTR_ID = "id"
 CONF_STATION_ID = "station_id"
 DEFAULT_SCAN_INTERVAL = 1800

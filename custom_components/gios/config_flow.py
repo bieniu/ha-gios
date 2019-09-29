@@ -1,6 +1,7 @@
 """Adds config flow for GIOS."""
-import aiohttp
 import logging
+
+import aiohttp
 import voluptuous as vol
 
 from homeassistant import config_entries
@@ -8,7 +9,6 @@ from homeassistant.const import CONF_NAME, CONF_SCAN_INTERVAL
 from homeassistant.core import callback
 
 from .const import (
-    _LOGGER,
     ATTR_ID,
     CONF_STATION_ID,
     DEFAULT_NAME,

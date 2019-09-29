@@ -4,7 +4,6 @@ Support for the GIOŚ service.
 For more details about this platform, please refer to the documentation at
 https://github.com/bieniu/ha-gios
 """
-import asyncio
 import logging
 from datetime import timedelta
 
@@ -19,7 +18,6 @@ from homeassistant.helpers.entity import Entity
 from homeassistant.util import Throttle
 
 from .const import (
-    _LOGGER,
     ATTR_ID,
     CONF_STATION_ID,
     DEFAULT_NAME,
@@ -123,7 +121,7 @@ class GiosSensor(Entity):
         self._state = None
         self._attrs = {ATTR_ATTRIBUTION: DEFAULT_ATTRIBUTION}
         self._icon = DEFAULT_ICON
-        self._unit_of_measurement = VOLUME_MICROGRAMS_PER_CUBIC_METER
+        self._unit_of_measurement = None
 
     @property
     def device_state_attributes(self):
@@ -176,12 +174,12 @@ class GiosSensor(Entity):
     def unit_of_measurement(self):
         """Return the unit the value is expressed in."""
         if self.kind != ATTR_AQI:
-            return self._unit_of_measurement
+            self._unit_of_measurement = VOLUME_MICROGRAMS_PER_CUBIC_METER
+        return self._unit_of_measurement
 
     @property
     def available(self):
         """Return True if entity is available."""
-        _LOGGER.debug(f"{self.kind}: {bool(self.gios.sensors)}")
         return bool(self.gios.sensors)
 
     async def async_update(self):

@@ -127,12 +127,11 @@ class GiosSensor(Entity):
     @property
     def device_state_attributes(self):
         """Return the state attributes."""
-        if self.gios.data_available:
-            self._attrs[ATTR_STATION] = self.gios.station_name
-            if self.kind != ATTR_AQI:
-                if self.gios.sensors[self.kind][ATTR_INDEX]:
-                    self._attrs[ATTR_INDEX] = self.gios.sensors[self.kind][ATTR_INDEX]
-                    self._attrs[ATTR_NAME] = self.gios.sensors[self.kind][ATTR_NAME]
+        self._attrs[ATTR_STATION] = self.gios.station_name
+        if self.kind != ATTR_AQI:
+            if self.gios.sensors[self.kind][ATTR_INDEX]:
+                self._attrs[ATTR_INDEX] = self.gios.sensors[self.kind][ATTR_INDEX]
+                self._attrs[ATTR_NAME] = self.gios.sensors[self.kind][ATTR_NAME]
         return self._attrs
 
     @property
@@ -164,13 +163,12 @@ class GiosSensor(Entity):
     @property
     def state(self):
         """Return the state."""
-        if self.gios.data_available:
-            try:
-                self._state = self.gios.sensors[self.kind][ATTR_VALUE]
-                if isinstance(self._state, float):
-                    self._state = round(self._state)
-            except (KeyError, ValueError):
-                _LOGGER.error("No data for %s", [self.kind])
+        try:
+            self._state = self.gios.sensors[self.kind][ATTR_VALUE]
+            if isinstance(self._state, float):
+                self._state = round(self._state)
+        except (KeyError, ValueError):
+            _LOGGER.error("No data for %s", [self.kind])
         return self._state
 
     @property
@@ -182,7 +180,8 @@ class GiosSensor(Entity):
     @property
     def available(self):
         """Return True if entity is available."""
-        return self.gios.data_available
+        _LOGGER.debug(f"{self.kind}: {bool(self.gios.sensors)}")
+        return bool(self.gios.sensors)
 
     async def async_update(self):
         """Get the data from GIOS."""
@@ -199,7 +198,6 @@ class GiosData:
         self.latitude = None
         self.longitude = None
         self.station_name = None
-        self.data_available = True
 
         self.async_update = Throttle(kwargs[CONF_SCAN_INTERVAL])(self._async_update)
 
@@ -207,72 +205,70 @@ class GiosData:
         """Update GIOS data."""
         station_available = False
         stations = await self._async_retreive_data(STATIONS_URL)
+        if not stations:
+            self.sensors = {}
+            return
         _LOGGER.debug("All stations data retrieved")
-        if stations:
-            for station in stations:
-                if station[ATTR_ID] == self.station_id:
-                    station_available = True
-                    self.latitude = station[ATTR_GEGR_LAT]
-                    self.longitude = station[ATTR_GEGR_LON]
-                    self.station_name = station[ATTR_STATION_NAME]
-            try:
-                if not station_available:
-                    raise Exception("Wrong station_id!")
-            except Exception:
-                _LOGGER.error(
-                    "Wrong station_id. There is no station %s!", self.station_id
-                )
-                return
-
+        for station in stations:
+            if station[ATTR_ID] == self.station_id:
+                station_available = True
+                self.latitude = station[ATTR_GEGR_LAT]
+                self.longitude = station[ATTR_GEGR_LON]
+                self.station_name = station[ATTR_STATION_NAME]
+        if not station_available:
+            _LOGGER.error("Wrong station_id. There is no station %s!", self.station_id)
+            self.sensors = {}
+            return
+            
         url = STATION_URL.format(self.station_id)
         station_data = await self._async_retreive_data(url)
+        if not station_data:
+            self.sensors = {}
+            return
         _LOGGER.debug("Station %s data retrieved", self.station_id)
-        if station_data:
-            for sensor in station_data:
-                self.sensors[sensor[ATTR_PARAM][ATTR_PARAM_CODE]] = {
-                    ATTR_ID: sensor[ATTR_ID],
-                    ATTR_NAME: sensor[ATTR_PARAM][ATTR_PARAM_NAME],
-                }
+        for sensor in station_data:
+            self.sensors[sensor[ATTR_PARAM][ATTR_PARAM_CODE]] = {
+                ATTR_ID: sensor[ATTR_ID],
+                ATTR_NAME: sensor[ATTR_PARAM][ATTR_PARAM_NAME],
+            }
 
         for sensor in self.sensors:
             if sensor != ATTR_AQI:
                 url = SENSOR_URL.format(self.sensors[sensor][ATTR_ID])
                 sensor_data = await self._async_retreive_data(url)
-                _LOGGER.debug("Sensor %s data retrieved", self.sensors[sensor][ATTR_ID])
-                if sensor_data:
-                    if sensor_data[ATTR_VALUES][0][ATTR_VALUE]:
-                        self.sensors[sensor][ATTR_VALUE] = sensor_data[ATTR_VALUES][0][
-                            ATTR_VALUE
-                        ]
-                    elif sensor_data[ATTR_VALUES][1][ATTR_VALUE]:
-                        self.sensors[sensor][ATTR_VALUE] = sensor_data[ATTR_VALUES][1][
-                            ATTR_VALUE
-                        ]
+                try:
+                    sensor_data = sensor_data[ATTR_VALUES]
+                    if sensor_data[0][ATTR_VALUE]:
+                        self.sensors[sensor][ATTR_VALUE] = sensor_data[0][ATTR_VALUE]
+                    elif sensor_data[1][ATTR_VALUE]:
+                        self.sensors[sensor][ATTR_VALUE] = sensor_data[1][ATTR_VALUE]
                     else:
-                        self.data_available = False
-                        _LOGGER.error("Incomplete sensors data.")
-                        return
+                        raise ValueError
+                    _LOGGER.debug("Sensor %s data retrieved", self.sensors[sensor][ATTR_ID])
+                except (ValueError, IndexError):
+                    _LOGGER.error("Incomplete sensors data.")
+                    self.sensors = {}
+                    return
 
         url = INDEXES_URL.format(self.station_id)
         indexes_data = await self._async_retreive_data(url)
         _LOGGER.debug("Indexes data retrieved")
-        if indexes_data:
-            try:
-                for sensor in self.sensors:
-                    if sensor != ATTR_AQI:
-                        index_level = ATTR_INDEX_LEVEL.format(
-                            sensor.lower().replace(".", "")
-                        )
-                        self.sensors[sensor][ATTR_INDEX] = indexes_data[index_level][
-                            ATTR_INDEX_LEVEL_NAME
-                        ].lower()
+        try:
+            for sensor in self.sensors:
+                if sensor != ATTR_AQI:
+                    index_level = ATTR_INDEX_LEVEL.format(
+                        sensor.lower().replace(".", "")
+                    )
+                    self.sensors[sensor][ATTR_INDEX] = indexes_data[index_level][
+                        ATTR_INDEX_LEVEL_NAME
+                    ].lower()
 
-                self.sensors[ATTR_AQI] = {ATTR_NAME: ATTR_AQI}
-                self.sensors[ATTR_AQI][ATTR_VALUE] = indexes_data[ATTR_ST_INDEX_LEVEL][
-                    ATTR_INDEX_LEVEL_NAME
-                ].lower()
-            except TypeError:
-                _LOGGER.warning("Incomplete indexes data.")
+            self.sensors[ATTR_AQI] = {ATTR_NAME: ATTR_AQI}
+            self.sensors[ATTR_AQI][ATTR_VALUE] = indexes_data[ATTR_ST_INDEX_LEVEL][
+                ATTR_INDEX_LEVEL_NAME
+            ].lower()
+        except (TypeError, IndexError):
+            _LOGGER.warning("Incomplete indexes data.")
 
     async def _async_retreive_data(self, url):
         """Retreive data from GIOS site via aiohttp."""
@@ -283,7 +279,9 @@ class GiosData:
                     data = await resp.json()
         except aiohttp.ClientError as error:
             _LOGGER.error("Could not fetch data: %s", error)
-        _LOGGER.debug("Data retrieved from GIOS, status: %s", resp.status)
+            return
         if resp.status != HTTP_OK:
             _LOGGER.error("Could not fetch data, status: %s", resp.status)
+        else:
+            _LOGGER.debug("Data retrieved from GIOS, status: %s", resp.status)
         return data

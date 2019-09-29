@@ -19,6 +19,7 @@ from .const import (
 
 _LOGGER = logging.getLogger(__name__)
 
+
 @callback
 def configured_instances(hass, condition):
     """Return a set of configured GIOS instances."""
@@ -75,6 +76,7 @@ class GiosFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     @staticmethod
     @callback
     def async_get_options_flow(config_entry):
+        """GIOS options callback."""
         return GiosOptionsFlowHandler(config_entry)
 
     async def async_step_import(self, import_config):
@@ -101,6 +103,8 @@ class GiosFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
 
 class GiosOptionsFlowHandler(config_entries.OptionsFlow):
+    """Config flow options for GIOS."""
+
     def __init__(self, config_entry):
         """Initialize Gios options flow."""
         self.config_entry = config_entry

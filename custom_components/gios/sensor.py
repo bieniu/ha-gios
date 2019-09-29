@@ -220,7 +220,7 @@ class GiosData:
             _LOGGER.error("Wrong station_id. There is no station %s!", self.station_id)
             self.sensors = {}
             return
-            
+
         url = STATION_URL.format(self.station_id)
         station_data = await self._async_retreive_data(url)
         if not station_data:
@@ -245,7 +245,9 @@ class GiosData:
                         self.sensors[sensor][ATTR_VALUE] = sensor_data[1][ATTR_VALUE]
                     else:
                         raise ValueError
-                    _LOGGER.debug("Sensor %s data retrieved", self.sensors[sensor][ATTR_ID])
+                    _LOGGER.debug(
+                        "Sensor %s data retrieved", self.sensors[sensor][ATTR_ID]
+                    )
                 except (ValueError, IndexError):
                     _LOGGER.error("Incomplete sensors data.")
                     self.sensors = {}

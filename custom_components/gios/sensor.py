@@ -126,9 +126,9 @@ class GiosSensor(Entity):
     @property
     def device_state_attributes(self):
         """Return the state attributes."""
-        self._attrs[ATTR_STATION] = self.gios.station_name
-        if self.kind != ATTR_AQI:
-            if self.gios.sensors[self.kind][ATTR_INDEX]:
+        if self.gios.sensors:
+            self._attrs[ATTR_STATION] = self.gios.station_name
+            if self.kind != ATTR_AQI and self.gios.sensors[self.kind][ATTR_INDEX]:
                 self._attrs[ATTR_INDEX] = self.gios.sensors[self.kind][ATTR_INDEX]
                 self._attrs[ATTR_NAME] = self.gios.sensors[self.kind][ATTR_NAME]
         return self._attrs
@@ -162,12 +162,10 @@ class GiosSensor(Entity):
     @property
     def state(self):
         """Return the state."""
-        try:
+        if self.gios.sensors:
             self._state = self.gios.sensors[self.kind][ATTR_VALUE]
             if isinstance(self._state, float):
                 self._state = round(self._state)
-        except (KeyError, ValueError):
-            _LOGGER.error("No data for %s", [self.kind])
         return self._state
 
     @property
@@ -246,7 +244,7 @@ class GiosData:
                     _LOGGER.debug(
                         "Sensor %s data retrieved", self.sensors[sensor][ATTR_ID]
                     )
-                except (ValueError, IndexError):
+                except (ValueError, IndexError, TypeError):
                     _LOGGER.error("Incomplete sensors data.")
                     self.sensors = {}
                     return
@@ -268,8 +266,9 @@ class GiosData:
             self.sensors[ATTR_AQI][ATTR_VALUE] = indexes_data[ATTR_ST_INDEX_LEVEL][
                 ATTR_INDEX_LEVEL_NAME
             ].lower()
-        except (TypeError, IndexError):
-            _LOGGER.warning("Incomplete indexes data.")
+        except (TypeError, IndexError, TypeError):
+            self.sensors = {}
+            _LOGGER.error("Incomplete indexes data.")
 
     async def _async_retreive_data(self, url):
         """Retreive data from GIOS site via aiohttp."""
@@ -279,10 +278,10 @@ class GiosData:
                 async with session.get(url) as resp:
                     data = await resp.json()
         except aiohttp.ClientError as error:
-            _LOGGER.error("Could not fetch data: %s", error)
+            _LOGGER.error("Could not fetch data from %s, error: %s", url, error)
             return
         if resp.status != HTTP_OK:
-            _LOGGER.error("Could not fetch data, status: %s", resp.status)
+            _LOGGER.error("Could not fetch data from %s, status: %s", url, resp.status)
         else:
-            _LOGGER.debug("Data retrieved from GIOS, status: %s", resp.status)
+            _LOGGER.debug("Data retrieved from %s, status: %s", url, resp.status)
         return data

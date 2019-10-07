@@ -29,6 +29,8 @@ key | optional | type | default | description
 -- | -- | -- | -- | --
 `station_id` | False | integer | | ID of the measuring station
 
+<a href="https://www.buymeacoffee.com/QnLdxeaqO" target="_blank"><img src="https://bmc-cdn.nyc3.digitaloceanspaces.com/BMC-button-images/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: auto !important;width: auto !important;" ></a>
+
 [releases]: https://github.com/bieniu/ha-gios/releases
 [releases-shield]: https://img.shields.io/github/release/bieniu/ha-gios.svg?style=popout
 [forum]: https://community.home-assistant.io/t/gios-polish-glowny-inspektorat-ochrony-srodowiska-air-quality-data-integration/127519

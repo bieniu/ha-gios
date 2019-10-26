@@ -28,27 +28,27 @@ class Gios:
         """Initialize."""
         self._data = {}
         self._available = False
-        self._station_id = station_id
-        self._latitude = None
-        self._longitude = None
-        self._station_name = None
+        self.station_id = station_id
+        self.latitude = None
+        self.longitude = None
+        self.station_name = None
 
         self.session = session
 
     async def update(self):
         """Update GIOS data."""
-        if not self._station_name:
+        if not self.station_name:
             stations = await self._async_get(URL_STATIONS)
             if not stations:
                 return
 
             for station in stations:
-                if station[ATTR_ID] == self._station_id:
-                    self._latitude = station["gegrLat"]
-                    self._longitude = station["gegrLon"]
-                    self._station_name = station["stationName"]
+                if station[ATTR_ID] == self.station_id:
+                    self.latitude = station["gegrLat"]
+                    self.longitude = station["gegrLon"]
+                    self.station_name = station["stationName"]
 
-            url = URL_STATION.format(self._station_id)
+            url = URL_STATION.format(self.station_id)
             station_data = await self._async_get(url)
             if not station_data:
                 return
@@ -65,7 +65,7 @@ class Gios:
                 sensor_data = sensor_data["values"]
                 self._data[sensor][ATTR_VALUE] = sensor_data[0][ATTR_VALUE]
 
-        url = URL_INDEXES.format(self._station_id)
+        url = URL_INDEXES.format(self.station_id)
         indexes = await self._async_get(url)
         try:
             for sensor in self._data:
@@ -114,21 +114,6 @@ class Gios:
         else:
             self._available = False
         return self._available
-
-    @property
-    def latitude(self):
-        """Return latitude of measuring station."""
-        return self._latitude
-
-    @property
-    def longitude(self):
-        """Return longitude of measuring station."""
-        return self._longitude
-
-    @property
-    def station_name(self):
-        """Return name of measuring station."""
-        return self._station_name
 
 
 class GiosError(Exception):

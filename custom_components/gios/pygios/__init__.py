@@ -67,10 +67,17 @@ class Gios:
         for sensor in self._data:
             if sensor != ATTR_AQI:
                 sensor_data = await self._get_sensor(sensor)
-                if sensor_data[0][ATTR_VALUE]:
-                    self._data[sensor][ATTR_VALUE] = sensor_data[0][ATTR_VALUE]
-                elif sensor_data[1][ATTR_VALUE]:
-                    self._data[sensor][ATTR_VALUE] = sensor_data[0][ATTR_VALUE]
+                try:
+                    if sensor_data[0][ATTR_VALUE]:
+                        self._data[sensor][ATTR_VALUE] = sensor_data[0][ATTR_VALUE]
+                    elif sensor_data[1][ATTR_VALUE]:
+                        self._data[sensor][ATTR_VALUE] = sensor_data[0][ATTR_VALUE]
+                    else:
+                        ValueError
+                except (ValueError, IndexError, TypeError):
+                    _LOGGER.error("Invalid data from GIOS API.")
+                    self._data = {}
+                    return
 
         indexes = await self._get_indexes()
         try:
@@ -136,7 +143,7 @@ class Gios:
     @property
     def available(self):
         """Return True is data is available."""
-        if len(self._data) > 1:
+        if len(self._data) > 0:
             self._available = True
         else:
             self._available = False

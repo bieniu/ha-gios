@@ -112,3 +112,4 @@ class GiosData:
         self.station_name = self._gios.station_name
         self.sensors = self._gios.data
         self.available = self._gios.available
+

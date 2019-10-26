@@ -4,8 +4,6 @@ Support for the GIOŚ service.
 For more details about this platform, please refer to the documentation at
 https://github.com/bieniu/ha-gios
 """
-import logging
-
 import voluptuous as vol
 
 from homeassistant import config_entries
@@ -26,8 +24,6 @@ from .const import (
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
 )
-
-_LOGGER = logging.getLogger(__name__)
 
 ATTRIBUTION = {"Data provided by GIOŚ"}
 DEFAULT_ICON = "mdi:blur"
@@ -100,7 +96,7 @@ class GiosSensor(Entity):
     @property
     def device_state_attributes(self):
         """Return the state attributes."""
-        if self.gios.sensors:
+        if self.gios.available:
             self._attrs[ATTR_STATION] = self.gios.station_name
             if self.kind != ATTR_AQI and self.gios.sensors[self.kind][ATTR_INDEX]:
                 self._attrs[ATTR_INDEX] = self.gios.sensors[self.kind][ATTR_INDEX]
@@ -141,7 +137,7 @@ class GiosSensor(Entity):
     @property
     def state(self):
         """Return the state."""
-        if self.gios.sensors:
+        if self.gios.available:
             self._state = self.gios.sensors[self.kind][ATTR_VALUE]
             if isinstance(self._state, float):
                 self._state = round(self._state)
@@ -157,8 +153,9 @@ class GiosSensor(Entity):
     @property
     def available(self):
         """Return True if entity is available."""
-        return bool(self.gios.sensors)
+        return self.gios.available
 
     async def async_update(self):
         """Get the data from GIOS."""
         await self.gios.async_update()
+

@@ -38,7 +38,7 @@ class Gios:
     async def update(self):
         """Update GIOS data."""
         if not self.station_name:
-            stations = await self._async_get(URL_STATIONS)
+            stations = await self._get_stations()
             if not stations:
                 return
 
@@ -47,9 +47,15 @@ class Gios:
                     self.latitude = station["gegrLat"]
                     self.longitude = station["gegrLon"]
                     self.station_name = station["stationName"]
+            if not self.station_name:
+                _LOGGER.error(
+                    "%s is not a valid measuring station ID.", self.station_id
+                )
+                raise GiosNoStation(
+                    f"{self.station_id} is not a valid measuring station ID."
+                )
 
-            url = URL_STATION.format(self.station_id)
-            station_data = await self._async_get(url)
+            station_data = await self._get_station()
             if not station_data:
                 return
             for sensor in station_data:
@@ -60,13 +66,10 @@ class Gios:
 
         for sensor in self._data:
             if sensor != ATTR_AQI:
-                url = URL_SENSOR.format(self._data[sensor][ATTR_ID])
-                sensor_data = await self._async_get(url)
-                sensor_data = sensor_data["values"]
+                sensor_data = await self._get_sensor(sensor)
                 self._data[sensor][ATTR_VALUE] = sensor_data[0][ATTR_VALUE]
 
-        url = URL_INDEXES.format(self.station_id)
-        indexes = await self._async_get(url)
+        indexes = await self._get_indexes()
         try:
             for sensor in self._data:
                 if sensor != ATTR_AQI:
@@ -84,21 +87,42 @@ class Gios:
         except (TypeError, IndexError, TypeError):
             _LOGGER.error("Invalid data from GIOS API")
 
+    async def _get_stations(self):
+        """Retreive list of measuring stations."""
+        stations = await self._async_get(URL_STATIONS)
+        return stations
+
+    async def _get_station(self):
+        """Retreive measuring station data."""
+        url = URL_STATION.format(self.station_id)
+        station = await self._async_get(url)
+        return station
+
+    async def _get_sensor(self, sensor):
+        """Retreive sensor data."""
+        url = URL_SENSOR.format(self._data[sensor][ATTR_ID])
+        sensor = await self._async_get(url)
+        return sensor["values"]
+
+    async def _get_indexes(self):
+        """Retreive indexes data."""
+        url = URL_INDEXES.format(self.station_id)
+        indexes = await self._async_get(url)
+        return indexes
+
     async def _async_get(self, url):
         """Retreive data from GIOS API."""
         data = None
         try:
-            async with self.session.get(url) as response:
-                if response.status != HTTP_OK:
-                    _LOGGER.warning(
-                        "Invalid response from GIOS API: %s", response.status
-                    )
-                    raise GiosError(response.status, await response.text())
-                data = await response.json()
+            async with self.session.get(url) as resp:
+                if resp.status != HTTP_OK:
+                    _LOGGER.warning("Invalid response from GIOS API: %s", resp.status)
+                    raise GiosApiError(await resp.text())
+                data = await resp.json()
         except ClientError as error:
             _LOGGER.error("Invalid response from from GIOS API: %s", error)
             return
-        _LOGGER.debug("Data retrieved from %s, status: %s", url, response.status)
+        _LOGGER.debug("Data retrieved from %s, status: %s", url, resp.status)
         return data
 
     @property
@@ -116,11 +140,19 @@ class Gios:
         return self._available
 
 
-class GiosError(Exception):
+class GiosApiError(Exception):
     """Raised when GIOS API request ended in error."""
 
-    def __init__(self, status_code, status):
+    def __init__(self, status):
         """Initialize."""
-        Exception.__init__(self, status_code, status)
-        self.status_code = status_code
+        super(GiosApiError, self).__init__(status)
+        self.status = status
+
+
+class GiosNoStation(Exception):
+    """Raised when no measuring station error."""
+
+    def __init__(self, status):
+        """Initialize."""
+        super(GiosNoStation, self).__init__(status)
         self.status = status

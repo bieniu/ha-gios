@@ -51,7 +51,7 @@ class Gios:
                 _LOGGER.error(
                     "%s is not a valid measuring station ID.", self.station_id
                 )
-                raise GiosNoStation(
+                raise NoStationError(
                     f"{self.station_id} is not a valid measuring station ID."
                 )
 
@@ -117,7 +117,7 @@ class Gios:
             async with self.session.get(url) as resp:
                 if resp.status != HTTP_OK:
                     _LOGGER.warning("Invalid response from GIOS API: %s", resp.status)
-                    raise GiosApiError(await resp.text())
+                    raise ApiError(await resp.text())
                 data = await resp.json()
         except ClientError as error:
             _LOGGER.error("Invalid response from from GIOS API: %s", error)
@@ -140,19 +140,19 @@ class Gios:
         return self._available
 
 
-class GiosApiError(Exception):
+class ApiError(Exception):
     """Raised when GIOS API request ended in error."""
 
     def __init__(self, status):
         """Initialize."""
-        super(GiosApiError, self).__init__(status)
+        super(ApiError, self).__init__(status)
         self.status = status
 
 
-class GiosNoStation(Exception):
+class NoStationError(Exception):
     """Raised when no measuring station error."""
 
     def __init__(self, status):
         """Initialize."""
-        super(GiosNoStation, self).__init__(status)
+        super(NoStationError, self).__init__(status)
         self.status = status

@@ -1,10 +1,9 @@
 import asyncio
 
 from aiohttp import ClientSession
-from pygios import Gios, GiosApiError, GiosNoStation
+from pygios import Gios, ApiError, NoStationError
 
-# GIOS_STATION_ID = 11794
-GIOS_STATION_ID = 0
+GIOS_STATION_ID = 11794
 
 
 async def main():
@@ -12,7 +11,7 @@ async def main():
         async with ClientSession() as websession:
             gios = Gios(GIOS_STATION_ID, websession)
             await gios.update()
-    except (GiosApiError, GiosNoStation) as error:
+    except (ApiError, NoStationError) as error:
         print(f"{error}")
         return
 

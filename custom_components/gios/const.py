@@ -10,4 +10,3 @@ DATA_CLIENT = "client"
 DEFAULT_SCAN_INTERVAL = 1800
 DEFAULT_NAME = "GIOŚ"
 DOMAIN = "gios"
-STATIONS_URL = "http://api.gios.gov.pl/pjp-api/rest/station/findAll"

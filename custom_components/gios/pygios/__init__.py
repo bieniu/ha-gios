@@ -15,7 +15,7 @@ ATTR_NAME = "name"
 ATTR_VALUE = "value"
 
 HTTP_OK = 200
-URL_INDEXES = "http://api.gios.gov.pl/pjp-api/rest/aqindex/getIndex/{}"
+URL_INDEXES = "http://api.gios.gov.pl/pjp-api/rest/aqindex/getIndex1/{}"
 URL_SENSOR = "http://api.gios.gov.pl/pjp-api/rest/data/getData/{}"
 URL_STATION = "http://api.gios.gov.pl/pjp-api/rest/station/sensors/{}"
 URL_STATIONS = "http://api.gios.gov.pl/pjp-api/rest/station/findAll"
@@ -26,7 +26,7 @@ class Gios:
 
     def __init__(self, station_id, session):
         """Initialize."""
-        self._data = {}
+        self.data = {}
         self._available = False
         self.station_id = station_id
         self.latitude = None
@@ -37,6 +37,8 @@ class Gios:
 
     async def update(self):
         """Update GIOS data."""
+        data = {}
+
         if not self.station_name:
             stations = await self._get_stations()
             if not stations:
@@ -59,52 +61,53 @@ class Gios:
         station_data = await self._get_station()
         if not station_data:
             _LOGGER.error("Invalid data from GIOS API.")
-            self._data = {}
+            self.data = {}
             return
         for sensor in station_data:
-            self._data[sensor["param"]["paramCode"]] = {
+            data[sensor["param"]["paramCode"]] = {
                 ATTR_ID: sensor[ATTR_ID],
                 ATTR_NAME: sensor["param"]["paramName"],
             }
 
-        for sensor in self._data:
+        for sensor in data:
             if sensor != ATTR_AQI:
-                sensor_data = await self._get_sensor(sensor)
+                sensor_data = await self._get_sensor(data[sensor][ATTR_ID])
                 try:
                     if sensor_data["values"][0][ATTR_VALUE]:
-                        self._data[sensor][ATTR_VALUE] = sensor_data["values"][0][
+                        data[sensor][ATTR_VALUE] = sensor_data["values"][0][
                             ATTR_VALUE
                         ]
                     elif sensor_data["values"][1][ATTR_VALUE]:
-                        self._data[sensor][ATTR_VALUE] = sensor_data["values"][1][
+                        data[sensor][ATTR_VALUE] = sensor_data["values"][1][
                             ATTR_VALUE
                         ]
                     else:
                         raise ValueError
                 except (ValueError, IndexError, TypeError):
                     _LOGGER.error("Invalid data from GIOS API.")
-                    self._data = {}
+                    self.data = {}
                     return
 
         indexes = await self._get_indexes()
         try:
-            for sensor in self._data:
+            for sensor in data:
                 if sensor != ATTR_AQI:
                     index_level = ATTR_INDEX_LEVEL.format(
                         sensor.lower().replace(".", "")
                     )
-                    self._data[sensor][ATTR_INDEX] = indexes[index_level][
+                    data[sensor][ATTR_INDEX] = indexes[index_level][
                         "indexLevelName"
                     ].lower()
 
-            self._data[ATTR_AQI] = {ATTR_NAME: ATTR_AQI}
-            self._data[ATTR_AQI][ATTR_VALUE] = indexes["stIndexLevel"][
+            data[ATTR_AQI] = {ATTR_NAME: ATTR_AQI}
+            data[ATTR_AQI][ATTR_VALUE] = indexes["stIndexLevel"][
                 "indexLevelName"
             ].lower()
         except (IndexError, TypeError):
             _LOGGER.error("Invalid data from GIOS API")
             self._data = {}
             return
+        self.data = data
 
     async def _get_stations(self):
         """Retreive list of measuring stations."""
@@ -119,7 +122,7 @@ class Gios:
 
     async def _get_sensor(self, sensor):
         """Retreive sensor data."""
-        url = URL_SENSOR.format(self._data[sensor][ATTR_ID])
+        url = URL_SENSOR.format(sensor)
         sensor = await self._async_get(url)
         return sensor
 
@@ -136,7 +139,7 @@ class Gios:
             async with self.session.get(url) as resp:
                 if resp.status != HTTP_OK:
                     _LOGGER.warning("Invalid response from GIOS API: %s", resp.status)
-                    raise ApiError(await resp.text())
+                    raise ApiError(resp.status)
                 data = await resp.json()
         except ClientError as error:
             _LOGGER.error("Invalid response from from GIOS API: %s", error)
@@ -145,14 +148,9 @@ class Gios:
         return data
 
     @property
-    def data(self):
-        """Return the data."""
-        return self._data
-
-    @property
     def available(self):
         """Return True is data is available."""
-        if self._data:
+        if self.data:
             self._available = True
         else:
             self._available = False

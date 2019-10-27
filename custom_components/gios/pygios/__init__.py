@@ -152,12 +152,11 @@ class Gios:
     @property
     def available(self):
         """Return True is data is available."""
-        _LOGGER.debug(f"len data: {str(len(self._data))}")
-        if len(self._data) > 0:
+        if self._data:
             self._available = True
         else:
             self._available = False
-        _LOGGER.debug(f"pygios available: {str(self._available)}")
+        _LOGGER.debug("pygios property available: %s", self._available)
         return self._available
 
 

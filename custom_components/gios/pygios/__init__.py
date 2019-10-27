@@ -56,23 +56,25 @@ class Gios:
                     f"{self.station_id} is not a valid measuring station ID."
                 )
 
-            station_data = await self._get_station()
-            if not station_data:
-                return
-            for sensor in station_data:
-                self._data[sensor["param"]["paramCode"]] = {
-                    ATTR_ID: sensor[ATTR_ID],
-                    ATTR_NAME: sensor["param"]["paramName"],
-                }
+        station_data = await self._get_station()
+        if not station_data:
+            _LOGGER.error("Invalid data from GIOS API.")
+            self._data = {}
+            return
+        for sensor in station_data:
+            self._data[sensor["param"]["paramCode"]] = {
+                ATTR_ID: sensor[ATTR_ID],
+                ATTR_NAME: sensor["param"]["paramName"],
+            }
 
         for sensor in self._data:
             if sensor != ATTR_AQI:
                 sensor_data = await self._get_sensor(sensor)
                 try:
-                    if sensor_data[0][ATTR_VALUE]:
-                        self._data[sensor][ATTR_VALUE] = sensor_data[0][ATTR_VALUE]
-                    elif sensor_data[1][ATTR_VALUE]:
-                        self._data[sensor][ATTR_VALUE] = sensor_data[1][ATTR_VALUE]
+                    if sensor_data["values"][0][ATTR_VALUE]:
+                        self._data[sensor][ATTR_VALUE] = sensor_data["values"][0][ATTR_VALUE]
+                    elif sensor_data["values"][1][ATTR_VALUE]:
+                        self._data[sensor][ATTR_VALUE] = sensor_data["values"][1][ATTR_VALUE]
                     else:
                         raise ValueError
                 except (ValueError, IndexError, TypeError):
@@ -115,7 +117,7 @@ class Gios:
         """Retreive sensor data."""
         url = URL_SENSOR.format(self._data[sensor][ATTR_ID])
         sensor = await self._async_get(url)
-        return sensor["values"]
+        return sensor
 
     async def _get_indexes(self):
         """Retreive indexes data."""

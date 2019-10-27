@@ -15,7 +15,7 @@ ATTR_NAME = "name"
 ATTR_VALUE = "value"
 
 HTTP_OK = 200
-URL_INDEXES = "http://api.gios.gov.pl/pjp-api/rest/aqindex/getIndex1/{}"
+URL_INDEXES = "http://api.gios.gov.pl/pjp-api/rest/aqindex/getIndex/{}"
 URL_SENSOR = "http://api.gios.gov.pl/pjp-api/rest/data/getData/{}"
 URL_STATION = "http://api.gios.gov.pl/pjp-api/rest/station/sensors/{}"
 URL_STATIONS = "http://api.gios.gov.pl/pjp-api/rest/station/findAll"
@@ -27,7 +27,6 @@ class Gios:
     def __init__(self, station_id, session):
         """Initialize."""
         self.data = {}
-        self._available = False
         self.station_id = station_id
         self.latitude = None
         self.longitude = None
@@ -41,9 +40,6 @@ class Gios:
 
         if not self.station_name:
             stations = await self._get_stations()
-            if not stations:
-                _LOGGER.error("Failed to retrieve the measuring stations list.")
-                return
 
             for station in stations:
                 if station[ATTR_ID] == self.station_id:
@@ -56,10 +52,7 @@ class Gios:
                 )
 
         station_data = await self._get_station()
-        if not station_data:
-            _LOGGER.error("Invalid measuring station data from GIOS API.")
-            self.data = {}
-            return
+
         for sensor in station_data:
             data[sensor["param"]["paramCode"]] = {
                 ATTR_ID: sensor[ATTR_ID],
@@ -67,30 +60,26 @@ class Gios:
             }
 
         for sensor in data:
-            if sensor != ATTR_AQI:
-                sensor_data = await self._get_sensor(data[sensor][ATTR_ID])
-                try:
-                    if sensor_data["values"][0][ATTR_VALUE]:
-                        data[sensor][ATTR_VALUE] = sensor_data["values"][0][ATTR_VALUE]
-                    elif sensor_data["values"][1][ATTR_VALUE]:
-                        data[sensor][ATTR_VALUE] = sensor_data["values"][1][ATTR_VALUE]
-                    else:
-                        raise ValueError
-                except (ValueError, IndexError, TypeError):
-                    _LOGGER.error("Invalid sensor data from GIOS API.")
-                    self.data = {}
-                    return
+            sensor_data = await self._get_sensor(data[sensor][ATTR_ID])
+            try:
+                if sensor_data["values"][0][ATTR_VALUE]:
+                    data[sensor][ATTR_VALUE] = sensor_data["values"][0][ATTR_VALUE]
+                elif sensor_data["values"][1][ATTR_VALUE]:
+                    data[sensor][ATTR_VALUE] = sensor_data["values"][1][ATTR_VALUE]
+                else:
+                    raise ValueError
+            except (ValueError, IndexError, TypeError):
+                _LOGGER.error("Invalid sensor data from GIOS API.")
+                self.data = {}
+                return
 
         indexes = await self._get_indexes()
         try:
             for sensor in data:
-                if sensor != ATTR_AQI:
-                    index_level = ATTR_INDEX_LEVEL.format(
-                        sensor.lower().replace(".", "")
-                    )
-                    data[sensor][ATTR_INDEX] = indexes[index_level][
-                        "indexLevelName"
-                    ].lower()
+                index_level = ATTR_INDEX_LEVEL.format(sensor.lower().replace(".", ""))
+                data[sensor][ATTR_INDEX] = indexes[index_level][
+                    "indexLevelName"
+                ].lower()
 
             data[ATTR_AQI] = {ATTR_NAME: ATTR_AQI}
             data[ATTR_AQI][ATTR_VALUE] = indexes["stIndexLevel"][
@@ -143,12 +132,7 @@ class Gios:
     @property
     def available(self):
         """Return True is data is available."""
-        if self.data:
-            self._available = True
-        else:
-            self._available = False
-        _LOGGER.debug("pygios property available: %s", self._available)
-        return self._available
+        return bool(self.data)
 
 
 class ApiError(Exception):

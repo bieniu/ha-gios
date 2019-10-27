@@ -21,9 +21,10 @@ async def main():
     longitude = gios.longitude
     station_name = gios.station_name
 
-    print(f"Data available: {available}")
-    print(f"Longitude: {longitude}, latitude: {latitude}, station name: {station_name}")
-    print(data)
+    if available:
+        print(f"Data available: {available}")
+        print(f"Longitude: {longitude}, latitude: {latitude}, station name: {station_name}")
+        print(data)
 
 
 loop = asyncio.get_event_loop()

@@ -95,7 +95,7 @@ class Gios:
             self._data[ATTR_AQI][ATTR_VALUE] = indexes["stIndexLevel"][
                 "indexLevelName"
             ].lower()
-        except (TypeError, IndexError, TypeError):
+        except (IndexError, TypeError):
             _LOGGER.error("Invalid data from GIOS API")
             self._data = {}
             return

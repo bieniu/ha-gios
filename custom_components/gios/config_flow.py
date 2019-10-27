@@ -10,13 +10,7 @@ from homeassistant.const import CONF_NAME, CONF_SCAN_INTERVAL
 from homeassistant.core import callback
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from .const import (
-    ATTR_ID,
-    CONF_STATION_ID,
-    DEFAULT_NAME,
-    DEFAULT_SCAN_INTERVAL,
-    DOMAIN,
-)
+from .const import ATTR_ID, CONF_STATION_ID, DEFAULT_NAME, DEFAULT_SCAN_INTERVAL, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -52,7 +46,9 @@ class GiosFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 self.hass, CONF_STATION_ID
             ):
                 self._errors[CONF_STATION_ID] = "station_id_exists"
-            station_id_valid = await self._test_station_id(websession, user_input["station_id"])
+            station_id_valid = await self._test_station_id(
+                websession, user_input["station_id"]
+            )
             if not station_id_valid:
                 self._errors["base"] = "wrong_station_id"
 

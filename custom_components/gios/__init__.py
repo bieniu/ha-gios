@@ -1,9 +1,11 @@
 """The GIOS component."""
 import logging
+from asyncio import TimeoutError
 from datetime import timedelta
 
 import aiohttp
 import async_timeout
+from aiohttp.client_exceptions import ClientConnectorError
 from .pygios import Gios, ApiError, NoStationError
 
 from homeassistant.const import CONF_SCAN_INTERVAL
@@ -101,13 +103,14 @@ class GiosData:
     async def _async_update(self):
         """Update GIOS data."""
         try:
-            with async_timeout.timeout(10):
+            with async_timeout.timeout(20):
                 await self._gios.update()
-        except (ApiError, NoStationError) as error:
+        except TimeoutError:
+            _LOGGER.error("Update states failed: TimeoutError")
+        except (ApiError, NoStationError, ClientConnectorError) as error:
             _LOGGER.error("Update states failed: %s", error)
         self.latitude = self._gios.latitude
         self.longitude = self._gios.longitude
         self.station_name = self._gios.station_name
         self.sensors = self._gios.data
         self.available = self._gios.available
-

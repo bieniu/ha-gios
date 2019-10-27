@@ -158,4 +158,3 @@ class GiosSensor(Entity):
     async def async_update(self):
         """Get the data from GIOS."""
         await self.gios.async_update()
-

@@ -40,6 +40,7 @@ class Gios:
         if not self.station_name:
             stations = await self._get_stations()
             if not stations:
+                _LOGGER.error("Failed to retrieve the measuring stations list.")
                 return
 
             for station in stations:
@@ -73,7 +74,7 @@ class Gios:
                     elif sensor_data[1][ATTR_VALUE]:
                         self._data[sensor][ATTR_VALUE] = sensor_data[0][ATTR_VALUE]
                     else:
-                        ValueError
+                        raise ValueError
                 except (ValueError, IndexError, TypeError):
                     _LOGGER.error("Invalid data from GIOS API.")
                     self._data = {}

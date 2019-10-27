@@ -72,9 +72,13 @@ class Gios:
                 sensor_data = await self._get_sensor(sensor)
                 try:
                     if sensor_data["values"][0][ATTR_VALUE]:
-                        self._data[sensor][ATTR_VALUE] = sensor_data["values"][0][ATTR_VALUE]
+                        self._data[sensor][ATTR_VALUE] = sensor_data["values"][0][
+                            ATTR_VALUE
+                        ]
                     elif sensor_data["values"][1][ATTR_VALUE]:
-                        self._data[sensor][ATTR_VALUE] = sensor_data["values"][1][ATTR_VALUE]
+                        self._data[sensor][ATTR_VALUE] = sensor_data["values"][1][
+                            ATTR_VALUE
+                        ]
                     else:
                         raise ValueError
                 except (ValueError, IndexError, TypeError):

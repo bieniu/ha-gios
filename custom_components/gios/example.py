@@ -23,7 +23,9 @@ async def main():
 
     if available:
         print(f"Data available: {available}")
-        print(f"Longitude: {longitude}, latitude: {latitude}, station name: {station_name}")
+        print(
+            f"Longitude: {longitude}, latitude: {latitude}, station name: {station_name}"
+        )
         print(data)
 
 

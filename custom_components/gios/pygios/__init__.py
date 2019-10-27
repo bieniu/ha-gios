@@ -72,7 +72,7 @@ class Gios:
                     if sensor_data[0][ATTR_VALUE]:
                         self._data[sensor][ATTR_VALUE] = sensor_data[0][ATTR_VALUE]
                     elif sensor_data[1][ATTR_VALUE]:
-                        self._data[sensor][ATTR_VALUE] = sensor_data[0][ATTR_VALUE]
+                        self._data[sensor][ATTR_VALUE] = sensor_data[1][ATTR_VALUE]
                     else:
                         raise ValueError
                 except (ValueError, IndexError, TypeError):
@@ -97,6 +97,8 @@ class Gios:
             ].lower()
         except (TypeError, IndexError, TypeError):
             _LOGGER.error("Invalid data from GIOS API")
+            self._data = {}
+            return
 
     async def _get_stations(self):
         """Retreive list of measuring stations."""
@@ -144,10 +146,12 @@ class Gios:
     @property
     def available(self):
         """Return True is data is available."""
+        _LOGGER.debug(f"len data: {str(len(self._data))}")
         if len(self._data) > 0:
             self._available = True
         else:
             self._available = False
+        _LOGGER.debug(f"pygios available: {str(self._available)}")
         return self._available
 
 

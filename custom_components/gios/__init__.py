@@ -1,11 +1,9 @@
 """The GIOS component."""
 import logging
-from asyncio import TimeoutError
 from datetime import timedelta
 
 import aiohttp
 import async_timeout
-from aiohttp.client_exceptions import ClientConnectorError
 from .pygios import Gios, ApiError, NoStationError
 
 from homeassistant.const import CONF_SCAN_INTERVAL
@@ -105,8 +103,8 @@ class GiosData:
         try:
             with async_timeout.timeout(10):
                 await self._gios.update()
-        except (ApiError, NoStationError, TimeoutError, ClientConnectorError) as error:
-            _LOGGER.error(error)
+        except (ApiError, NoStationError) as error:
+            _LOGGER.error("Update states failed: %s", error)
         self.latitude = self._gios.latitude
         self.longitude = self._gios.longitude
         self.station_name = self._gios.station_name

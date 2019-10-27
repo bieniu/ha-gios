@@ -103,7 +103,7 @@ class GiosData:
     async def _async_update(self):
         """Update GIOS data."""
         try:
-            with async_timeout.timeout(20):
+            with async_timeout.timeout(30):
                 await self._gios.update()
         except TimeoutError:
             _LOGGER.error("Update states failed: TimeoutError")

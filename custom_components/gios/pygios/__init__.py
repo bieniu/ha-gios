@@ -71,13 +71,9 @@ class Gios:
                 sensor_data = await self._get_sensor(data[sensor][ATTR_ID])
                 try:
                     if sensor_data["values"][0][ATTR_VALUE]:
-                        data[sensor][ATTR_VALUE] = sensor_data["values"][0][
-                            ATTR_VALUE
-                        ]
+                        data[sensor][ATTR_VALUE] = sensor_data["values"][0][ATTR_VALUE]
                     elif sensor_data["values"][1][ATTR_VALUE]:
-                        data[sensor][ATTR_VALUE] = sensor_data["values"][1][
-                            ATTR_VALUE
-                        ]
+                        data[sensor][ATTR_VALUE] = sensor_data["values"][1][ATTR_VALUE]
                     else:
                         raise ValueError
                 except (ValueError, IndexError, TypeError):
@@ -102,7 +98,7 @@ class Gios:
             ].lower()
         except (IndexError, TypeError):
             _LOGGER.error("Invalid index data from GIOS API")
-            self._data = {}
+            self.data = {}
             return
         self.data = data
 

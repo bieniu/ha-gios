@@ -35,12 +35,15 @@ class Gios:
 
         self.session = session
 
-    async def update(self):
+    async def update(self): # pylint: disable=too-many-branches
         """Update GIOS data."""
         data = {}
 
         if not self.station_name:
             stations = await self._get_stations()
+            if not stations:
+                _LOGGER.error("Invalid measuring stations list from GIOS API.")
+                return
 
             for station in stations:
                 if station[ATTR_ID] == self.station_id:
@@ -54,25 +57,35 @@ class Gios:
 
             self._station_data = await self._get_station()
 
-        for sensor in self._station_data:
-            data[sensor["param"]["paramCode"]] = {
-                ATTR_ID: sensor[ATTR_ID],
-                ATTR_NAME: sensor["param"]["paramName"],
-            }
+        if not self._station_data:
+            _LOGGER.error("Invalid measuring station data from GIOS API.")
+            self.station_name = None
+            self.data = {}
+            return
+        try:
+            for sensor in self._station_data:
+                data[sensor["param"]["paramCode"]] = {
+                    ATTR_ID: sensor[ATTR_ID],
+                    ATTR_NAME: sensor["param"]["paramName"],
+                }
+        except (IndexError, TypeError):
+            _LOGGER.error("Invalid sensor data from GIOS API.")
+            self.data = {}
+            return
 
-        for sensor in data:
-            sensor_data = await self._get_sensor(data[sensor][ATTR_ID])
-            try:
+        try:
+            for sensor in data:
+                sensor_data = await self._get_sensor(data[sensor][ATTR_ID])
                 if sensor_data["values"][0][ATTR_VALUE]:
                     data[sensor][ATTR_VALUE] = sensor_data["values"][0][ATTR_VALUE]
                 elif sensor_data["values"][1][ATTR_VALUE]:
                     data[sensor][ATTR_VALUE] = sensor_data["values"][1][ATTR_VALUE]
                 else:
                     raise ValueError
-            except (ValueError, IndexError, TypeError):
-                _LOGGER.error("Invalid sensor data from GIOS API.")
-                self.data = {}
-                return
+        except (ValueError, IndexError, TypeError):
+            _LOGGER.error("Invalid sensor data from GIOS API.")
+            self.data = {}
+            return
 
         indexes = await self._get_indexes()
         try:

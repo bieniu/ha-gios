@@ -31,6 +31,7 @@ class Gios:
         self.latitude = None
         self.longitude = None
         self.station_name = None
+        self._station_data = {}
 
         self.session = session
 
@@ -51,9 +52,9 @@ class Gios:
                     f"{self.station_id} is not a valid measuring station ID."
                 )
 
-        station_data = await self._get_station()
+            self._station_data = await self._get_station()
 
-        for sensor in station_data:
+        for sensor in self._station_data:
             data[sensor["param"]["paramCode"]] = {
                 ATTR_ID: sensor[ATTR_ID],
                 ATTR_NAME: sensor["param"]["paramName"],

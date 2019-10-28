@@ -1,14 +1,14 @@
 """Adds config flow for GIOS."""
 import logging
 
-import async_timeout
 import voluptuous as vol
+from async_timeout import timeout
 from homeassistant import config_entries
 from homeassistant.const import CONF_NAME, CONF_SCAN_INTERVAL
 from homeassistant.core import callback
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from .const import  CONF_STATION_ID, DEFAULT_NAME, DEFAULT_SCAN_INTERVAL, DOMAIN
+from .const import CONF_STATION_ID, DEFAULT_NAME, DEFAULT_SCAN_INTERVAL, DOMAIN
 from .pygios import ApiError, Gios, NoStationError
 
 _LOGGER = logging.getLogger(__name__)
@@ -90,7 +90,7 @@ class GiosFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     async def _test_station_id(self, client, station_id):
         """Return true if station_id is valid."""
         try:
-            with async_timeout.timeout(10):
+            with timeout(None):
                 gios = Gios(station_id, client)
                 await gios.update()
         except NoStationError:

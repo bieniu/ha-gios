@@ -35,7 +35,7 @@ class Gios:
 
         self.session = session
 
-    async def update(self): # pylint: disable=too-many-branches
+    async def update(self):  # pylint: disable=too-many-branches
         """Update GIOS data."""
         data = {}
 

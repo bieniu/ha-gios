@@ -11,28 +11,15 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.util import Throttle
 
 from .const import (
-    ATTR_ID,
     ATTR_INDEX,
     ATTR_STATION,
     ATTR_VALUE,
     CONF_STATION_ID,
     DATA_CLIENT,
-    DEFAULT_NAME,
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
 )
 from .pygios import ApiError, Gios, NoStationError
-
-ATTR_GEGR_LAT = "gegrLat"
-ATTR_GEGR_LON = "gegrLon"
-ATTR_INDEX_LEVEL = "{}IndexLevel"
-ATTR_INDEX_LEVEL_NAME = "indexLevelName"
-ATTR_PARAM = "param"
-ATTR_PARAM_CODE = "paramCode"
-ATTR_PARAM_NAME = "paramName"
-ATTR_ST_INDEX_LEVEL = "stIndexLevel"
-ATTR_STATION_NAME = "stationName"
-ATTR_VALUES = "values"
 
 _LOGGER = logging.getLogger(__name__)
 

@@ -91,7 +91,7 @@ class GiosData:
             with timeout(None):
                 await self._gios.update()
         except (ApiError, NoStationError, ClientConnectorError) as error:
-            _LOGGER.error("Update states failed: %s", error)
+            _LOGGER.error("GIOS data update failed: %s", error)
         self.available = self._gios.available
         self.latitude = self._gios.latitude
         self.longitude = self._gios.longitude

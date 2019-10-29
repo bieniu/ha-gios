@@ -27,8 +27,6 @@ from .const import (
     DOMAIN,
 )
 
-_LOGGER = logging.getLogger(__name__)
-
 ATTRIBUTION = {"Data provided by GIOŚ"}
 DEFAULT_ICON = "mdi:blur"
 
@@ -160,7 +158,6 @@ class GiosSensor(Entity):
     @property
     def available(self):
         """Return True if entity is available."""
-        _LOGGER.debug(f"sensor {self.kind} available: {str(self.gios.available)}")
         return self.gios.available
 
     async def async_update(self):

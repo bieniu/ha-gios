@@ -5,6 +5,7 @@ from datetime import timedelta
 
 from aiohttp.client_exceptions import ClientConnectorError
 from async_timeout import timeout
+from gios import ApiError, Gios, NoStationError
 from homeassistant.const import CONF_SCAN_INTERVAL
 from homeassistant.core import Config, HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
@@ -19,7 +20,6 @@ from .const import (
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
 )
-from .pygios import ApiError, Gios, NoStationError
 
 _LOGGER = logging.getLogger(__name__)
 

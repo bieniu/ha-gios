@@ -3,13 +3,13 @@ import logging
 
 import voluptuous as vol
 from async_timeout import timeout
+from gios import ApiError, Gios, NoStationError
 from homeassistant import config_entries
 from homeassistant.const import CONF_NAME, CONF_SCAN_INTERVAL
 from homeassistant.core import callback
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .const import CONF_STATION_ID, DEFAULT_NAME, DEFAULT_SCAN_INTERVAL, DOMAIN
-from .pygios import ApiError, Gios, NoStationError
 
 _LOGGER = logging.getLogger(__name__)
 

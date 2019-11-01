@@ -4,7 +4,7 @@ from asyncio import TimeoutError
 from datetime import timedelta
 
 from aiohttp.client_exceptions import ClientConnectorError
-from async_timeout import timeout, TimeoutError
+from async_timeout import timeout
 from gios import ApiError, Gios, NoStationError
 from homeassistant.const import CONF_SCAN_INTERVAL
 from homeassistant.core import Config, HomeAssistant

@@ -11,7 +11,6 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.const import ATTR_ATTRIBUTION, CONF_NAME, CONF_SCAN_INTERVAL
-from homeassistant.exceptions import PlatformNotReady
 from homeassistant.helpers.entity import Entity
 
 from .const import (
@@ -75,9 +74,6 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     name = config_entry.data[CONF_NAME]
 
     data = hass.data[DOMAIN][DATA_CLIENT][config_entry.entry_id]
-
-    if not data.available:
-        raise PlatformNotReady()
 
     sensors = []
     for sensor in data.sensors:

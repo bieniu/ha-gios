@@ -8,6 +8,7 @@ from async_timeout import timeout
 from gios import ApiError, Gios, NoStationError
 from homeassistant.const import CONF_SCAN_INTERVAL
 from homeassistant.core import Config, HomeAssistant
+from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.util import Throttle
 
@@ -45,6 +46,9 @@ async def async_setup_entry(hass, config_entry):
     )
 
     await gios.async_update()
+
+    if not gios.available:
+        raise ConfigEntryNotReady()
 
     hass.data[DOMAIN] = {}
     hass.data[DOMAIN][DATA_CLIENT] = {}

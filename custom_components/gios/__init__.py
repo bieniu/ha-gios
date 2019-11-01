@@ -4,7 +4,7 @@ from asyncio import TimeoutError
 from datetime import timedelta
 
 from aiohttp.client_exceptions import ClientConnectorError
-from async_timeout import timeout
+from async_timeout import timeout, TimeoutError
 from gios import ApiError, Gios, NoStationError
 from homeassistant.const import CONF_SCAN_INTERVAL
 from homeassistant.core import Config, HomeAssistant
@@ -92,8 +92,10 @@ class GiosData:
     async def _async_update(self):
         """Update GIOS data."""
         try:
-            with timeout(None):
+            with timeout(30):
                 await self._gios.update()
+        except TimeoutError:
+            _LOGGER.error("Asyncio Timeout Error")
         except (ApiError, NoStationError, ClientConnectorError) as error:
             _LOGGER.error("GIOS data update failed: %s", error)
         self.available = self._gios.available

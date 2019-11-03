@@ -27,6 +27,8 @@ _LOGGER = logging.getLogger(__name__)
 
 async def async_setup(hass: HomeAssistant, config: Config) -> bool:
     """Set up configured GIOS."""
+    hass.data[DOMAIN] = {}
+    hass.data[DOMAIN][DATA_CLIENT] = {}
     return True
 
 
@@ -50,8 +52,6 @@ async def async_setup_entry(hass, config_entry):
     if not gios.available:
         raise ConfigEntryNotReady()
 
-    hass.data[DOMAIN] = {}
-    hass.data[DOMAIN][DATA_CLIENT] = {}
     hass.data[DOMAIN][DATA_CLIENT][config_entry.entry_id] = gios
 
     config_entry.add_update_listener(update_listener)

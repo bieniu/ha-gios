@@ -1,21 +1,15 @@
 """Adds config flow for GIOS."""
 import logging
 
-import aiohttp
 import voluptuous as vol
-
+from async_timeout import timeout
+from gios import ApiError, Gios, NoStationError
 from homeassistant import config_entries
 from homeassistant.const import CONF_NAME, CONF_SCAN_INTERVAL
 from homeassistant.core import callback
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from .const import (
-    ATTR_ID,
-    CONF_STATION_ID,
-    DEFAULT_NAME,
-    DEFAULT_SCAN_INTERVAL,
-    DOMAIN,
-    STATIONS_URL,
-)
+from .const import CONF_STATION_ID, DEFAULT_NAME, DEFAULT_SCAN_INTERVAL, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -42,6 +36,8 @@ class GiosFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         """Handle a flow initialized by the user."""
         self._errors = {}
 
+        websession = async_get_clientsession(self.hass)
+
         if user_input is not None:
             if user_input[CONF_NAME] in configured_instances(self.hass, CONF_NAME):
                 self._errors[CONF_NAME] = "name_exists"
@@ -49,7 +45,9 @@ class GiosFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 self.hass, CONF_STATION_ID
             ):
                 self._errors[CONF_STATION_ID] = "station_id_exists"
-            station_id_valid = await self._test_station_id(user_input["station_id"])
+            station_id_valid = await self._test_station_id(
+                websession, user_input["station_id"]
+            )
             if not station_id_valid:
                 self._errors["base"] = "wrong_station_id"
 
@@ -89,17 +87,15 @@ class GiosFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         )
         return self.async_create_entry(title="configuration.yaml", data=import_config)
 
-    async def _test_station_id(self, station_id):
+    async def _test_station_id(self, client, station_id):
         """Return true if station_id is valid."""
-
-        async with aiohttp.ClientSession() as session:
-            async with session.get(STATIONS_URL) as resp:
-                stations = await resp.json()
-        if stations:
-            for station in stations:
-                if station[ATTR_ID] == station_id:
-                    return True
-        return False
+        try:
+            with timeout(None):
+                gios = Gios(station_id, client)
+                await gios.update()
+        except NoStationError:
+            return False
+        return True
 
 
 class GiosOptionsFlowHandler(config_entries.OptionsFlow):

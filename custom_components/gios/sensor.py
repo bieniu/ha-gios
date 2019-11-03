@@ -6,12 +6,11 @@ https://github.com/bieniu/ha-gios
 """
 import logging
 
+import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
-
 from homeassistant import config_entries
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.const import ATTR_ATTRIBUTION, CONF_NAME, CONF_SCAN_INTERVAL
-import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.entity import Entity
 
 from .const import (
@@ -26,8 +25,6 @@ from .const import (
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
 )
-
-_LOGGER = logging.getLogger(__name__)
 
 ATTRIBUTION = {"Data provided by GIOŚ"}
 DEFAULT_ICON = "mdi:blur"
@@ -100,8 +97,8 @@ class GiosSensor(Entity):
     @property
     def device_state_attributes(self):
         """Return the state attributes."""
-        if self.gios.sensors:
-            self._attrs[ATTR_STATION] = self.gios.station_name
+        self._attrs[ATTR_STATION] = self.gios.station_name
+        if self.gios.available:
             if self.kind != ATTR_AQI and self.gios.sensors[self.kind][ATTR_INDEX]:
                 self._attrs[ATTR_INDEX] = self.gios.sensors[self.kind][ATTR_INDEX]
                 self._attrs[ATTR_NAME] = self.gios.sensors[self.kind][ATTR_NAME]
@@ -141,7 +138,7 @@ class GiosSensor(Entity):
     @property
     def state(self):
         """Return the state."""
-        if self.gios.sensors:
+        if self.gios.available:
             self._state = self.gios.sensors[self.kind][ATTR_VALUE]
             if isinstance(self._state, float):
                 self._state = round(self._state)
@@ -157,7 +154,7 @@ class GiosSensor(Entity):
     @property
     def available(self):
         """Return True if entity is available."""
-        return bool(self.gios.sensors)
+        return self.gios.available
 
     async def async_update(self):
         """Get the data from GIOS."""

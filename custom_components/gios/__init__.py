@@ -1,6 +1,6 @@
 """The GIOS component."""
+import asyncio
 import logging
-from asyncio import TimeoutError
 from datetime import timedelta
 
 from aiohttp.client_exceptions import ClientConnectorError
@@ -94,7 +94,7 @@ class GiosData:
         try:
             with timeout(30):
                 await self._gios.update()
-        except TimeoutError:
+        except asyncio.TimeoutError:
             _LOGGER.error("Asyncio Timeout Error")
         except (ApiError, NoStationError, ClientConnectorError) as error:
             _LOGGER.error("GIOS data update failed: %s", error)

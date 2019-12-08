@@ -1,9 +1,10 @@
 """Adds config flow for GIOS."""
 import logging
 
-import voluptuous as vol
 from async_timeout import timeout
 from gios import ApiError, Gios, NoStationError
+import voluptuous as vol
+
 from homeassistant import config_entries
 from homeassistant.const import CONF_NAME, CONF_SCAN_INTERVAL
 from homeassistant.core import callback
@@ -46,7 +47,8 @@ class GiosFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             ):
                 self._errors[CONF_STATION_ID] = "station_id_exists"
             station_id_valid = await self._test_station_id(
-                websession, user_input[CONF_STATION_ID])
+                websession, user_input[CONF_STATION_ID]
+            )
             if station_id_valid:
                 sensors_data_valid = await self._test_sensors_data(
                     websession, user_input[CONF_STATION_ID]

@@ -1,11 +1,12 @@
 """The GIOS component."""
 import asyncio
-import logging
 from datetime import timedelta
+import logging
 
 from aiohttp.client_exceptions import ClientConnectorError
 from async_timeout import timeout
 from gios import ApiError, Gios, NoStationError
+
 from homeassistant.const import CONF_SCAN_INTERVAL
 from homeassistant.core import Config, HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady

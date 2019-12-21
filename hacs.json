@@ -1,4 +1,7 @@
 {
   "name": "GIOŚ",
-  "homeassistant": "0.98.0"
+  "homeassistant": "0.98.0",
+  "iot_class": "cloud_poll",
+  "domains": ["sensor"],
+  "country": "PL"
 }

@@ -3,5 +3,7 @@
   "homeassistant": "0.98.0",
   "iot_class": "cloud_poll",
   "domains": ["sensor"],
-  "country": "PL"
+  "country": "PL",
+  "zip_release": true,
+  "filename": "gios.zip"
 }

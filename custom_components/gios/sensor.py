@@ -1,6 +1,4 @@
 """Support for the GIOŚ service."""
-import logging
-
 import voluptuous as vol
 
 from homeassistant import config_entries

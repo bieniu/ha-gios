@@ -2,7 +2,7 @@
 import logging
 
 from async_timeout import timeout
-from gios import ApiError, Gios, NoStationError
+from gios import Gios, NoStationError
 import voluptuous as vol
 
 from homeassistant import config_entries

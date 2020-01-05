@@ -14,9 +14,6 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.util import Throttle
 
 from .const import (
-    ATTR_INDEX,
-    ATTR_STATION,
-    ATTR_VALUE,
     CONF_STATION_ID,
     DATA_CLIENT,
     DEFAULT_SCAN_INTERVAL,

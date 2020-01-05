@@ -1,3 +1,5 @@
+[![Community Forum][forum-shield]][forum]  [![Buy me a coffee][buy-me-a-coffee-shield]][buy-me-a-coffee]
+
 ![Screenshot](https://github.com/bieniu/ha-gios/blob/master/images/gios-ha.png?raw=true)
 
 You can add this integration to Home Assistant via `Configuration -> Integrations -> Add -> Airly` or `configuration.yaml` file. You can add this integration several times for different locations, e.g. home and work.
@@ -23,3 +25,8 @@ sensor:
 key | optional | type | default | description
 -- | -- | -- | -- | --
 `station_id` | False | integer | | ID of the measuring station
+
+[forum]: https://community.home-assistant.io/t/gios-polish-glowny-inspektorat-ochrony-srodowiska-air-quality-data-integration/127519
+[forum-shield]: https://img.shields.io/badge/community-forum-brightgreen.svg?style=popout
+[buy-me-a-coffee-shield]: https://img.shields.io/static/v1.svg?label=%20&message=Buy%20me%20a%20coffee&color=6f4e37&logo=buy%20me%20a%20coffee&logoColor=white
+[buy-me-a-coffee]: https://www.buymeacoffee.com/QnLdxeaqO

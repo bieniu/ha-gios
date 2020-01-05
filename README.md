@@ -1,5 +1,6 @@
 # GIOŚ (Główny Inspektorat Ochrony Środowiska)
 [![GitHub Release][releases-shield]][releases]
+[![GitHub All Releases][downloads-total-shield]][releases]
 [![hacs_badge][hacs-shield]][hacs]
 [![Community Forum][forum-shield]][forum]
 [![Buy me a coffee][buy-me-a-coffee-shield]][buy-me-a-coffee]
@@ -32,6 +33,7 @@ key | optional | type | default | description
 
 [releases]: https://github.com/bieniu/ha-gios/releases
 [releases-shield]: https://img.shields.io/github/release/bieniu/ha-gios.svg?style=popout
+[downloads-total-shield]: https://img.shields.io/github/downloads/bieniu/ha-gios/total
 [forum]: https://community.home-assistant.io/t/gios-polish-glowny-inspektorat-ochrony-srodowiska-air-quality-data-integration/127519
 [forum-shield]: https://img.shields.io/badge/community-forum-brightgreen.svg?style=popout
 [buy-me-a-coffee-shield]: https://img.shields.io/static/v1.svg?label=%20&message=Buy%20me%20a%20coffee&color=6f4e37&logo=buy%20me%20a%20coffee&logoColor=white

@@ -13,12 +13,7 @@ from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.util import Throttle
 
-from .const import (
-    CONF_STATION_ID,
-    DATA_CLIENT,
-    DEFAULT_SCAN_INTERVAL,
-    DOMAIN,
-)
+from .const import CONF_STATION_ID, DATA_CLIENT, DEFAULT_SCAN_INTERVAL, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 

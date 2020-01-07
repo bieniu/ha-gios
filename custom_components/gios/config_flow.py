@@ -66,7 +66,7 @@ class GiosFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             data_schema=vol.Schema(
                 {
                     vol.Required(CONF_STATION_ID, default=station_id): int,
-                    vol.Optional(CONF_NAME, default=name): str,
+                    vol.Optional(CONF_NAME, default=self.hass.config.latitude): str,
                 }
             ),
             errors=self._errors,
@@ -77,16 +77,6 @@ class GiosFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     def async_get_options_flow(config_entry):
         """GIOS options callback."""
         return GiosOptionsFlowHandler(config_entry)
-
-    async def async_step_import(self, import_config):
-        """Import a config entry from configuration.yaml."""
-        if self._async_current_entries():
-            return self.async_abort(reason="single_instance_allowed")
-        _LOGGER.warning(
-            "GIOŚ configuration from configuration.yaml was imported to "
-            "integrations. You can safely remove configuration from configuration.yaml."
-        )
-        return self.async_create_entry(title="configuration.yaml", data=import_config)
 
     async def _test_station_id(self, client, station_id):
         """Return true if station_id is valid."""

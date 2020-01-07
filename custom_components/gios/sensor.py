@@ -1,6 +1,4 @@
 """Support for the GIOŚ service."""
-import logging
-
 from homeassistant.const import ATTR_ATTRIBUTION, CONF_NAME
 from homeassistant.helpers.entity import Entity
 
@@ -29,8 +27,6 @@ SENSOR_TYPES = {
     ATTR_PM25.lower(),
     ATTR_SO2.lower(),
 }
-
-_LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):

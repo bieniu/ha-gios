@@ -19,13 +19,15 @@ _LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup(hass: HomeAssistant, config: Config) -> bool:
-    """Set up configured GIOS."""
-    hass.data[DOMAIN] = {}
+    """Old way of setting up GIOS integrations."""
     return True
 
 
 async def async_setup_entry(hass, config_entry):
     """Set up GIOS as config entry."""
+    if DOMAIN not in hass.data:
+        hass.data[DOMAIN] = {}
+
     station_id = config_entry.data[CONF_STATION_ID]
 
     # For backwards compat, set unique ID

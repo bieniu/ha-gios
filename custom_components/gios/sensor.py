@@ -67,7 +67,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     """Add a GIOS entities from a config_entry."""
     name = config_entry.data[CONF_NAME]
 
-    data = hass.data[DOMAIN][DATA_CLIENT][config_entry.entry_id]
+    data = hass.data[DOMAIN][config_entry.entry_id]
 
     sensors = []
     for sensor in data.sensors:

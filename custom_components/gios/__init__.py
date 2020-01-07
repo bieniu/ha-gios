@@ -13,7 +13,7 @@ from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.util import Throttle
 
-from .const import CONF_STATION_ID, DATA_CLIENT, DEFAULT_SCAN_INTERVAL, DOMAIN
+from .const import CONF_STATION_ID, DEFAULT_SCAN_INTERVAL, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -21,13 +21,17 @@ _LOGGER = logging.getLogger(__name__)
 async def async_setup(hass: HomeAssistant, config: Config) -> bool:
     """Set up configured GIOS."""
     hass.data[DOMAIN] = {}
-    hass.data[DOMAIN][DATA_CLIENT] = {}
     return True
 
 
 async def async_setup_entry(hass, config_entry):
     """Set up GIOS as config entry."""
     station_id = config_entry.data[CONF_STATION_ID]
+
+    # For backwards compat, set unique ID
+    if config_entry.unique_id is None:
+        hass.config_entries.async_update_entry(config_entry, unique_id=station_id)
+
     try:
         scan_interval = config_entry.options[CONF_SCAN_INTERVAL]
     except KeyError:
@@ -45,7 +49,7 @@ async def async_setup_entry(hass, config_entry):
     if not gios.available:
         raise ConfigEntryNotReady()
 
-    hass.data[DOMAIN][DATA_CLIENT][config_entry.entry_id] = gios
+    hass.data[DOMAIN][config_entry.entry_id] = gios
 
     config_entry.add_update_listener(update_listener)
     hass.async_create_task(

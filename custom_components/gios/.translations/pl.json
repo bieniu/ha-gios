@@ -12,9 +12,7 @@
       }
     },
     "error": {
-      "name_exists": "Nazwa już istnieje.",
       "wrong_station_id": "ID stacji pomiarowej nie jest poprawne.",
-      "station_id_exists": "ID stacji pomiarowej już istnieje.",
       "invalid_sensors_data": "Dane sensorów tej stacji pomiarowej nie są poprawne."
     }
   },

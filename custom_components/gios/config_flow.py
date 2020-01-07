@@ -15,14 +15,6 @@ from .const import CONF_STATION_ID, DEFAULT_NAME, DEFAULT_SCAN_INTERVAL, DOMAIN
 _LOGGER = logging.getLogger(__name__)
 
 
-@callback
-def configured_instances(hass, condition):
-    """Return a set of configured GIOS instances."""
-    return set(
-        entry.data[condition] for entry in hass.config_entries.async_entries(DOMAIN)
-    )
-
-
 class GiosFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     """Config flow for GIOS."""
 
@@ -40,12 +32,8 @@ class GiosFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         websession = async_get_clientsession(self.hass)
 
         if user_input is not None:
-            if user_input[CONF_NAME] in configured_instances(self.hass, CONF_NAME):
-                self._errors[CONF_NAME] = "name_exists"
-            if user_input[CONF_STATION_ID] in configured_instances(
-                self.hass, CONF_STATION_ID
-            ):
-                self._errors[CONF_STATION_ID] = "station_id_exists"
+            await self.async_set_unique_id(user_input[CONF_STATION_ID])
+            self._abort_if_unique_id_configured()
             station_id_valid = await self._test_station_id(
                 websession, user_input[CONF_STATION_ID]
             )
@@ -60,7 +48,7 @@ class GiosFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
             if not self._errors:
                 return self.async_create_entry(
-                    title=user_input[CONF_NAME], data=user_input
+                    title=user_input[CONF_STATION_ID], data=user_input
                 )
 
         return self._show_config_form(name=DEFAULT_NAME, station_id="")

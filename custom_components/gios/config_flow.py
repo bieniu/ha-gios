@@ -10,12 +10,11 @@ from homeassistant.const import CONF_NAME, CONF_SCAN_INTERVAL
 from homeassistant.core import callback
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from .const import (
+from .const import (  # pylint:disable=unused-import
     CONF_STATION_ID,
-    DEFAULT_NAME,
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
-)  # pylint:disable=unused-import
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -56,7 +55,9 @@ class GiosFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                     title=user_input[CONF_STATION_ID], data=user_input
                 )
 
-        return self._show_config_form(name=DEFAULT_NAME, station_id="")
+        return self._show_config_form(
+            name=self.hass.config.location_name, station_id=""
+        )
 
     def _show_config_form(self, name=None, station_id=None):
         """Show the configuration form to edit data."""

@@ -4,14 +4,7 @@ import logging
 from homeassistant.const import ATTR_ATTRIBUTION, CONF_NAME
 from homeassistant.helpers.entity import Entity
 
-from .const import (
-    ATTR_AQI,
-    ATTR_INDEX,
-    ATTR_NAME,
-    ATTR_STATION,
-    ATTR_VALUE,
-    DOMAIN,
-)
+from .const import ATTR_AQI, ATTR_INDEX, ATTR_NAME, ATTR_STATION, ATTR_VALUE, DOMAIN
 
 ATTRIBUTION = {"Data provided by GIOŚ"}
 DEFAULT_ICON = "mdi:blur"

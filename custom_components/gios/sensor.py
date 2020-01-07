@@ -1,10 +1,7 @@
 """Support for the GIOŚ service."""
 import logging
 
-import voluptuous as vol
-
-from homeassistant import config_entries
-from homeassistant.const import ATTR_ATTRIBUTION, CONF_NAME, CONF_SCAN_INTERVAL
+from homeassistant.const import ATTR_ATTRIBUTION, CONF_NAME
 from homeassistant.helpers.entity import Entity
 
 from .const import (
@@ -13,10 +10,6 @@ from .const import (
     ATTR_NAME,
     ATTR_STATION,
     ATTR_VALUE,
-    CONF_STATION_ID,
-    DATA_CLIENT,
-    DEFAULT_NAME,
-    DEFAULT_SCAN_INTERVAL,
     DOMAIN,
 )
 
@@ -46,8 +39,10 @@ SENSOR_TYPES = {
 
 _LOGGER = logging.getLogger(__name__)
 
+
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
     """Old way of setting up GIOS integrations."""
+
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
     """Add a GIOS entities from a config_entry."""

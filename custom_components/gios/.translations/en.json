@@ -14,6 +14,9 @@
     "error": {
       "wrong_station_id": "ID of the measuring station is not correct.",
       "invalid_sensors_data": "Invalid sensors' data for this measuring station."
+    },
+    "abort": {
+      "already_configured": "GIOS integration for this measuring station is already configured."
     }
   },
   "options": {

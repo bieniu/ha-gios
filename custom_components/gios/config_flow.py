@@ -66,7 +66,9 @@ class GiosFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             data_schema=vol.Schema(
                 {
                     vol.Required(CONF_STATION_ID, default=station_id): int,
-                    vol.Optional(CONF_NAME, default=self.hass.config.latitude): str,
+                    vol.Optional(
+                        CONF_NAME, default=self.hass.config.location_name
+                    ): str,
                 }
             ),
             errors=self._errors,

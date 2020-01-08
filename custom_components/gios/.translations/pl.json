@@ -14,6 +14,9 @@
     "error": {
       "wrong_station_id": "ID stacji pomiarowej nie jest poprawne.",
       "invalid_sensors_data": "Dane sensorów tej stacji pomiarowej nie są poprawne."
+    },
+    "abort": {
+      "already_configured": "Integracja GIOŚ dla tej stacji pomiarowej jest już skonfigurowana."
     }
   },
   "options": {

@@ -1,24 +1,8 @@
 """Support for the GIOŚ service."""
-import voluptuous as vol
-
-from homeassistant import config_entries
-from homeassistant.components.sensor import PLATFORM_SCHEMA
-from homeassistant.const import ATTR_ATTRIBUTION, CONF_NAME, CONF_SCAN_INTERVAL
-import homeassistant.helpers.config_validation as cv
+from homeassistant.const import ATTR_ATTRIBUTION, CONF_NAME
 from homeassistant.helpers.entity import Entity
 
-from .const import (
-    ATTR_AQI,
-    ATTR_INDEX,
-    ATTR_NAME,
-    ATTR_STATION,
-    ATTR_VALUE,
-    CONF_STATION_ID,
-    DATA_CLIENT,
-    DEFAULT_NAME,
-    DEFAULT_SCAN_INTERVAL,
-    DOMAIN,
-)
+from .const import ATTR_AQI, ATTR_INDEX, ATTR_NAME, ATTR_STATION, ATTR_VALUE, DOMAIN
 
 ATTRIBUTION = {"Data provided by GIOŚ"}
 DEFAULT_ICON = "mdi:blur"
@@ -44,30 +28,16 @@ SENSOR_TYPES = {
     ATTR_SO2.lower(),
 }
 
-PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
-    {
-        vol.Required(CONF_STATION_ID, None): cv.positive_int,
-        vol.Optional(CONF_NAME, default=DEFAULT_NAME): cv.string,
-        vol.Optional(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL): cv.time_period,
-    }
-)
-
 
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
-    """Configure the platform and add the sensors."""
-    del config[CONF_SCAN_INTERVAL]
-    hass.async_create_task(
-        hass.config_entries.flow.async_init(
-            DOMAIN, context={"source": config_entries.SOURCE_IMPORT}, data=config
-        )
-    )
+    """Old way of setting up GIOS integrations."""
 
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
     """Add a GIOS entities from a config_entry."""
     name = config_entry.data[CONF_NAME]
 
-    data = hass.data[DOMAIN][DATA_CLIENT][config_entry.entry_id]
+    data = hass.data[DOMAIN][config_entry.entry_id]
 
     sensors = []
     for sensor in data.sensors:

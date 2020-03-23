@@ -15,6 +15,9 @@ ATTR_PM10 = "PM10"
 ATTR_PM25 = "PM25"
 ATTR_SO2 = "SO2"
 
+ATTR_STATION_ID = "station_id"
+ATTR_STATION_NAME = "station_name"
+
 VOLUME_MICROGRAMS_PER_CUBIC_METER = "µg/m³"
 
 SENSOR_TYPES = {
@@ -29,30 +32,28 @@ SENSOR_TYPES = {
 }
 
 
-async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
-    """Old way of setting up GIOS integrations."""
-
-
 async def async_setup_entry(hass, config_entry, async_add_entities):
     """Add a GIOS entities from a config_entry."""
     name = config_entry.data[CONF_NAME]
 
-    data = hass.data[DOMAIN][config_entry.entry_id]
+    coordinator = hass.data[DOMAIN][config_entry.entry_id]
 
     sensors = []
-    for sensor in data.sensors:
-        sensors.append(GiosSensor(name, sensor, data))
+
+    for sensor in coordinator.data:
+        if sensor.lower() in SENSOR_TYPES:
+            sensors.append(GiosSensor(name, sensor, coordinator))
     async_add_entities(sensors, True)
 
 
 class GiosSensor(Entity):
     """Define an GIOS sensor."""
 
-    def __init__(self, name, kind, data):
+    def __init__(self, name, kind, coordinator):
         """Initialize."""
         self._name = name
         self.kind = kind
-        self.gios = data
+        self.coordinator = coordinator
         self._state = None
         self._attrs = {ATTR_ATTRIBUTION: ATTRIBUTION}
         self._icon = DEFAULT_ICON
@@ -61,11 +62,10 @@ class GiosSensor(Entity):
     @property
     def device_state_attributes(self):
         """Return the state attributes."""
-        self._attrs[ATTR_STATION] = self.gios.station_name
-        if self.gios.available:
-            if self.kind != ATTR_AQI and self.gios.sensors[self.kind][ATTR_INDEX]:
-                self._attrs[ATTR_INDEX] = self.gios.sensors[self.kind][ATTR_INDEX]
-                self._attrs[ATTR_NAME] = self.gios.sensors[self.kind][ATTR_NAME]
+        self._attrs[ATTR_STATION] = self.coordinator.data[ATTR_STATION_NAME]
+        if self.kind != ATTR_AQI and self.coordinator.data[self.kind][ATTR_INDEX]:
+            self._attrs[ATTR_INDEX] = self.coordinator.data[self.kind][ATTR_INDEX]
+            self._attrs[ATTR_NAME] = self.coordinator.data[self.kind][ATTR_NAME]
         return self._attrs
 
     @property
@@ -97,15 +97,14 @@ class GiosSensor(Entity):
     @property
     def unique_id(self):
         """Return a unique_id for this entity."""
-        return f"{self.gios.latitude}-{self.gios.longitude}-{self.kind}"
+        return f"{self.coordinator.data[ATTR_STATION_ID]}-{self.kind}"
 
     @property
     def state(self):
         """Return the state."""
-        if self.gios.available:
-            self._state = self.gios.sensors[self.kind][ATTR_VALUE]
-            if isinstance(self._state, float):
-                self._state = round(self._state)
+        self._state = self.coordinator.data[self.kind][ATTR_VALUE]
+        if isinstance(self._state, float):
+            self._state = round(self._state)
         return self._state
 
     @property
@@ -116,10 +115,23 @@ class GiosSensor(Entity):
         return self._unit_of_measurement
 
     @property
+    def should_poll(self):
+        """Return the polling requirement of the entity."""
+        return False
+
+    @property
     def available(self):
         """Return True if entity is available."""
-        return self.gios.available
+        return self.coordinator.last_update_success
+
+    async def async_added_to_hass(self):
+        """Connect to dispatcher listening for entity data notifications."""
+        self.coordinator.async_add_listener(self.async_write_ha_state)
+
+    async def async_will_remove_from_hass(self):
+        """Disconnect from update signal."""
+        self.coordinator.async_remove_listener(self.async_write_ha_state)
 
     async def async_update(self):
-        """Get the data from GIOS."""
-        await self.gios.async_update()
+        """Update GIOS entity."""
+        await self.coordinator.async_request_refresh()

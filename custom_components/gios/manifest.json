@@ -4,7 +4,7 @@
   "documentation": "https://github.com/bieniu/ha-gios",
   "dependencies": [],
   "codeowners": ["@bieniu"],
-  "homeassistant": "0.107.0",
+  "homeassistant": "0.108.0",
   "requirements": ["gios==0.0.5"],
   "config_flow": true
 }

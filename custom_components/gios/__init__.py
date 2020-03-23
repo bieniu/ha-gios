@@ -1,5 +1,4 @@
 """The GIOS component."""
-import asyncio
 from datetime import timedelta
 import logging
 
@@ -11,7 +10,7 @@ from homeassistant.const import CONF_SCAN_INTERVAL
 from homeassistant.core import Config, HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
-from homeassistant.util import Throttle
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .const import CONF_STATION_ID, DEFAULT_SCAN_INTERVAL, DOMAIN
 
@@ -19,15 +18,12 @@ _LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup(hass: HomeAssistant, config: Config) -> bool:
-    """Old way of setting up GIOS integrations."""
+    """Set up configured GIOS."""
     return True
 
 
 async def async_setup_entry(hass, config_entry):
     """Set up GIOS as config entry."""
-    if DOMAIN not in hass.data:
-        hass.data[DOMAIN] = {}
-
     station_id = config_entry.data[CONF_STATION_ID]
 
     # For backwards compat, set unique ID
@@ -35,23 +31,21 @@ async def async_setup_entry(hass, config_entry):
         hass.config_entries.async_update_entry(config_entry, unique_id=station_id)
 
     try:
-        scan_interval = config_entry.options[CONF_SCAN_INTERVAL]
+        scan_interval = timedelta(seconds=config_entry.options[CONF_SCAN_INTERVAL])
     except KeyError:
-        scan_interval = DEFAULT_SCAN_INTERVAL
+        scan_interval = timedelta(seconds=DEFAULT_SCAN_INTERVAL)
     _LOGGER.debug("Using station_id: %s", station_id)
 
     websession = async_get_clientsession(hass)
 
-    gios = GiosData(
-        websession, station_id, scan_interval=timedelta(seconds=scan_interval)
-    )
+    coordinator = GiosDataUpdateCoordinator(hass, websession, station_id, scan_interval)
+    await coordinator.async_refresh()
 
-    await gios.async_update()
+    if not coordinator.last_update_success:
+        raise ConfigEntryNotReady
 
-    if not gios.available:
-        raise ConfigEntryNotReady()
-
-    hass.data[DOMAIN][config_entry.entry_id] = gios
+    hass.data.setdefault(DOMAIN, {})
+    hass.data[DOMAIN][config_entry.entry_id] = coordinator
 
     config_entry.add_update_listener(update_listener)
     hass.async_create_task(
@@ -73,32 +67,20 @@ async def update_listener(hass, entry):
     hass.async_add_job(hass.config_entries.async_forward_entry_setup(entry, "sensor"))
 
 
-class GiosData:
-    """Define an object to hold GIOS data."""
+class GiosDataUpdateCoordinator(DataUpdateCoordinator):
+    """Class to manage fetching GIOS data API."""
 
-    def __init__(self, session, station_id, **kwargs):
+    def __init__(self, hass, session, station_id, scan_interval):
         """Initialize."""
         self._gios = Gios(station_id, session)
-        self.station_id = station_id
-        self.sensors = {}
-        self.latitude = None
-        self.longitude = None
-        self.station_name = None
-        self.available = True
 
-        self.async_update = Throttle(kwargs[CONF_SCAN_INTERVAL])(self._async_update)
+        super().__init__(hass, _LOGGER, name=DOMAIN, update_interval=scan_interval)
 
-    async def _async_update(self):
-        """Update GIOS data."""
+    async def _async_update_data(self):
+        """Update data via library."""
         try:
             with timeout(30):
                 await self._gios.update()
-        except asyncio.TimeoutError:
-            _LOGGER.error("Asyncio Timeout Error")
         except (ApiError, NoStationError, ClientConnectorError) as error:
-            _LOGGER.error("GIOS data update failed: %s", error)
-        self.available = self._gios.available
-        self.latitude = self._gios.latitude
-        self.longitude = self._gios.longitude
-        self.station_name = self._gios.station_name
-        self.sensors = self._gios.data
+            raise UpdateFailed(error)
+        return self._gios.data

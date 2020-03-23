@@ -60,10 +60,11 @@ async def async_unload_entry(hass, config_entry):
     return True
 
 
-async def update_listener(hass, entry):
+async def update_listener(hass, config_entry):
     """Update listener."""
-    await hass.config_entries.async_forward_entry_unload(entry, "sensor")
-    hass.async_add_job(hass.config_entries.async_forward_entry_setup(entry, "sensor"))
+    hass.data[DOMAIN].pop(config_entry.entry_id)
+    await hass.config_entries.async_forward_entry_unload(config_entry, "sensor")
+    hass.async_add_job(async_setup_entry(hass, config_entry))
 
 
 class GiosDataUpdateCoordinator(DataUpdateCoordinator):

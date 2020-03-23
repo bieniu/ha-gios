@@ -43,7 +43,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     for sensor in coordinator.data:
         if sensor.lower() in SENSOR_TYPES:
             sensors.append(GiosSensor(name, sensor, coordinator))
-    async_add_entities(sensors, True)
+    async_add_entities(sensors, False)
 
 
 class GiosSensor(Entity):

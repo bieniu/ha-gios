@@ -2,6 +2,7 @@
 from datetime import timedelta
 import logging
 
+from aiohttp.client_exceptions import ClientConnectorError
 from async_timeout import timeout
 from gios import ApiError, Gios, NoStationError
 
@@ -81,6 +82,6 @@ class GiosDataUpdateCoordinator(DataUpdateCoordinator):
         try:
             with timeout(30):
                 await self._gios.update()
-        except (ApiError, NoStationError) as error:
+        except (ApiError, NoStationError, ClientConnectorError) as error:
             raise UpdateFailed(error)
         return self._gios.data

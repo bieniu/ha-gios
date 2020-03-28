@@ -1,5 +1,9 @@
 """Support for the GIOŚ service."""
-from homeassistant.const import ATTR_ATTRIBUTION, CONF_NAME
+from homeassistant.const import (
+    ATTR_ATTRIBUTION,
+    CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
+    CONF_NAME,
+)
 from homeassistant.helpers.entity import Entity
 
 from .const import ATTR_AQI, ATTR_INDEX, ATTR_NAME, ATTR_STATION, ATTR_VALUE, DOMAIN
@@ -17,8 +21,6 @@ ATTR_SO2 = "SO2"
 
 ATTR_STATION_ID = "station_id"
 ATTR_STATION_NAME = "station_name"
-
-VOLUME_MICROGRAMS_PER_CUBIC_METER = "µg/m³"
 
 SENSOR_TYPES = {
     ATTR_AQI.lower(),
@@ -62,7 +64,7 @@ class GiosSensor(Entity):
     @property
     def device_state_attributes(self):
         """Return the state attributes."""
-        self._attrs[ATTR_STATION] = self.coordinator.data[ATTR_STATION_NAME]
+        self._attrs[ATTR_STATION] = self.coordinator.gios.station_name
         if self.kind != ATTR_AQI and self.coordinator.data[self.kind][ATTR_INDEX]:
             self._attrs[ATTR_INDEX] = self.coordinator.data[self.kind][ATTR_INDEX]
             self._attrs[ATTR_NAME] = self.coordinator.data[self.kind][ATTR_NAME]
@@ -97,7 +99,7 @@ class GiosSensor(Entity):
     @property
     def unique_id(self):
         """Return a unique_id for this entity."""
-        return f"{self.coordinator.data[ATTR_STATION_ID]}-{self.kind}"
+        return f"{self.coordinator.gios.station_id}-{self.kind}"
 
     @property
     def state(self):
@@ -111,7 +113,7 @@ class GiosSensor(Entity):
     def unit_of_measurement(self):
         """Return the unit the value is expressed in."""
         if self.kind != ATTR_AQI:
-            self._unit_of_measurement = VOLUME_MICROGRAMS_PER_CUBIC_METER
+            self._unit_of_measurement = CONCENTRATION_MICROGRAMS_PER_CUBIC_METER
         return self._unit_of_measurement
 
     @property

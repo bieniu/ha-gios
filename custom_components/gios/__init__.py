@@ -4,7 +4,7 @@ import logging
 
 from aiohttp.client_exceptions import ClientConnectorError
 from async_timeout import timeout
-from gios import ApiError, Gios, NoStationError
+from gios import ApiError, Gios, InvalidSensorsData, NoStationError
 
 from homeassistant.const import CONF_SCAN_INTERVAL
 from homeassistant.core import Config, HomeAssistant
@@ -73,7 +73,7 @@ class GiosDataUpdateCoordinator(DataUpdateCoordinator):
 
     def __init__(self, hass, session, station_id, scan_interval):
         """Initialize."""
-        self._gios = Gios(station_id, session)
+        self.gios = Gios(station_id, session)
 
         super().__init__(hass, _LOGGER, name=DOMAIN, update_interval=scan_interval)
 
@@ -81,7 +81,12 @@ class GiosDataUpdateCoordinator(DataUpdateCoordinator):
         """Update data via library."""
         try:
             with timeout(30):
-                await self._gios.update()
-        except (ApiError, NoStationError, ClientConnectorError) as error:
+                await self.gios.update()
+        except (
+            ApiError,
+            NoStationError,
+            ClientConnectorError,
+            InvalidSensorsData,
+        ) as error:
             raise UpdateFailed(error)
-        return self._gios.data
+        return self.gios.data

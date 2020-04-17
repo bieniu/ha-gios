@@ -1,4 +1,6 @@
 # GIOŚ (Główny Inspektorat Ochrony Środowiska)
+
+![Validate with hassfest](https://github.com/bieniu/ha-gios/workflows/Validate%20with%20hassfest/badge.svg)
 [![GitHub Release][releases-shield]][releases]
 [![GitHub All Releases][downloads-total-shield]][releases]
 [![hacs_badge][hacs-shield]][hacs]

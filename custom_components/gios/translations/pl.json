@@ -1,10 +1,9 @@
 {
   "config": {
-    "title": "Główny Inspektorat Ochrony Środowiska (GIOŚ)",
     "step": {
       "user": {
         "title": "Główny Inspektorat Ochrony Środowiska (GIOŚ)",
-        "description": "Jeśli potrzebujesz pomocy z konfiguracją, przejdź na stronę: https://github.com/bieniu/ha-gios",
+        "description": "Jeśli potrzebujesz pomocy z konfiguracją, przejdź na stronę: https://github.com/bieniu/ha-gios \n\n Zalecane jest używanie oficjalnej wersji integracji, przejdź do: https://www.home-assistant.io/integrations/gios/",
         "data": {
           "name": "Nazwa integracji",
           "station_id": "ID stacji pomiarowej"

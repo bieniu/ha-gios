@@ -6,7 +6,15 @@ from homeassistant.const import (
 )
 from homeassistant.helpers.entity import Entity
 
-from .const import ATTR_AQI, ATTR_INDEX, ATTR_NAME, ATTR_STATION, ATTR_VALUE, DOMAIN
+from .const import (
+    ATTR_AQI,
+    ATTR_INDEX,
+    ATTR_NAME,
+    ATTR_STATION,
+    ATTR_VALUE,
+    COORDINATOR,
+    DOMAIN,
+)
 
 ATTRIBUTION = {"Data provided by GIOŚ"}
 DEFAULT_ICON = "mdi:blur"
@@ -38,7 +46,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     """Add a GIOS entities from a config_entry."""
     name = config_entry.data[CONF_NAME]
 
-    coordinator = hass.data[DOMAIN][config_entry.entry_id]
+    coordinator = hass.data[DOMAIN][config_entry.entry_id][COORDINATOR]
 
     sensors = []
 

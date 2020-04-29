@@ -1,4 +1,5 @@
 """The GIOS component."""
+import asyncio
 from datetime import timedelta
 import logging
 
@@ -12,9 +13,17 @@ from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .const import CONF_STATION_ID, DEFAULT_SCAN_INTERVAL, DOMAIN
+from .const import (
+    CONF_STATION_ID,
+    COORDINATOR,
+    DEFAULT_SCAN_INTERVAL,
+    DOMAIN,
+    UNDO_UPDATE_LISTENER,
+)
 
 _LOGGER = logging.getLogger(__name__)
+
+PLATFORMS = ["sensor"]
 
 
 async def async_setup(hass: HomeAssistant, config: Config) -> bool:
@@ -44,21 +53,39 @@ async def async_setup_entry(hass, config_entry):
     if not coordinator.last_update_success:
         raise ConfigEntryNotReady
 
-    hass.data.setdefault(DOMAIN, {})
-    hass.data[DOMAIN][config_entry.entry_id] = coordinator
+    undo_listener = config_entry.add_update_listener(update_listener)
 
-    config_entry.add_update_listener(update_listener)
-    hass.async_create_task(
-        hass.config_entries.async_forward_entry_setup(config_entry, "sensor")
-    )
+    hass.data.setdefault(DOMAIN, {})
+    hass.data[DOMAIN][config_entry.entry_id] = {
+        COORDINATOR: coordinator,
+        UNDO_UPDATE_LISTENER: undo_listener,
+    }
+
+    for component in PLATFORMS:
+        hass.async_create_task(
+            hass.config_entries.async_forward_entry_setup(config_entry, component)
+        )
+
     return True
 
 
 async def async_unload_entry(hass, config_entry):
     """Unload a config entry."""
-    hass.data[DOMAIN].pop(config_entry.entry_id)
-    await hass.config_entries.async_forward_entry_unload(config_entry, "sensor")
-    return True
+    unload_ok = all(
+        await asyncio.gather(
+            *[
+                hass.config_entries.async_forward_entry_unload(config_entry, component)
+                for component in PLATFORMS
+            ]
+        )
+    )
+
+    hass.data[DOMAIN][config_entry.entry_id][UNDO_UPDATE_LISTENER]()
+
+    if unload_ok:
+        hass.data[DOMAIN].pop(config_entry.entry_id)
+
+    return unload_ok
 
 
 async def update_listener(hass, config_entry):

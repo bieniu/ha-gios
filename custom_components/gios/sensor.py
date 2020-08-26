@@ -13,7 +13,9 @@ from .const import (
     ATTR_STATION,
     ATTR_VALUE,
     COORDINATOR,
+    DEFAULT_NAME,
     DOMAIN,
+    MANUFACTURER
 )
 
 ATTRIBUTION = {"Data provided by GIOŚ"}
@@ -123,6 +125,16 @@ class GiosSensor(Entity):
         if self.kind != ATTR_AQI:
             self._unit_of_measurement = CONCENTRATION_MICROGRAMS_PER_CUBIC_METER
         return self._unit_of_measurement
+
+    @property
+    def device_info(self):
+        """Return the device info."""
+        return {
+            "identifiers": {(DOMAIN, self.coordinator.gios.station_id)},
+            "name": DEFAULT_NAME,
+            "manufacturer": MANUFACTURER,
+            "entry_type": "service",
+        }
 
     @property
     def should_poll(self):

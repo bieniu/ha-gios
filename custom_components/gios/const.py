@@ -10,4 +10,5 @@ CONF_STATION_ID = "station_id"
 COORDINATOR = "coordinator"
 DEFAULT_SCAN_INTERVAL = 1800
 DOMAIN = "gios"
+MANUFACTURER = "Główny Inspektorat Ochrony Środowiska"
 UNDO_UPDATE_LISTENER = "undo_update_listener"

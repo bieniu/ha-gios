@@ -15,7 +15,7 @@ from .const import (
     COORDINATOR,
     DEFAULT_NAME,
     DOMAIN,
-    MANUFACTURER
+    MANUFACTURER,
 )
 
 ATTRIBUTION = {"Data provided by GIOŚ"}

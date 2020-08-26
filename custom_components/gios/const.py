@@ -8,6 +8,7 @@ ATTR_VALUE = "value"
 CONF_STATION_ID = "station_id"
 
 COORDINATOR = "coordinator"
+DEFAULT_NAME = "GIOŚ"
 DEFAULT_SCAN_INTERVAL = 1800
 DOMAIN = "gios"
 MANUFACTURER = "Główny Inspektorat Ochrony Środowiska"

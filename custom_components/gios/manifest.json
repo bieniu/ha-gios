@@ -4,6 +4,6 @@
   "documentation": "https://github.com/bieniu/ha-gios",
   "dependencies": [],
   "codeowners": ["@bieniu"],
-  "requirements": ["gios==0.1.2"],
+  "requirements": ["gios==0.1.3"],
   "config_flow": true
 }

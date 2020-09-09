@@ -4,7 +4,7 @@ from homeassistant.const import (
     CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
     CONF_NAME,
 )
-from homeassistant.helpers.entity import Entity
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import (
     ATTR_AQI,
@@ -58,14 +58,14 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     async_add_entities(sensors, False)
 
 
-class GiosSensor(Entity):
+class GiosSensor(CoordinatorEntity):
     """Define an GIOS sensor."""
 
     def __init__(self, name, kind, coordinator):
         """Initialize."""
+        super().__init__(coordinator)
         self._name = name
         self.kind = kind
-        self.coordinator = coordinator
         self._state = None
         self._attrs = {ATTR_ATTRIBUTION: ATTRIBUTION}
         self._icon = DEFAULT_ICON
@@ -135,23 +135,3 @@ class GiosSensor(Entity):
             "manufacturer": MANUFACTURER,
             "entry_type": "service",
         }
-
-    @property
-    def should_poll(self):
-        """Return the polling requirement of the entity."""
-        return False
-
-    @property
-    def available(self):
-        """Return True if entity is available."""
-        return self.coordinator.last_update_success
-
-    async def async_added_to_hass(self):
-        """Connect to dispatcher listening for entity data notifications."""
-        self.async_on_remove(
-            self.coordinator.async_add_listener(self.async_write_ha_state)
-        )
-
-    async def async_update(self):
-        """Update GIOS entity."""
-        await self.coordinator.async_request_refresh()
